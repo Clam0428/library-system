@@ -1,0 +1,812 @@
+<div id="fragmentLends" class="fade-in" style="min-height: calc(100vh - 80px);">
+    <div class="container-fluid py-4 px-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h3 class="font-weight-bold mb-1" style="color: #1e293b;">借阅管理</h3>
+                <p class="text-muted small mb-0">管理读者借阅记录、逾期处理及统计</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-primary px-4 shadow-sm mr-2" id="btnShowBorrowModal" style="border-radius: 10px;">
+                    <i class="fas fa-plus mr-2"></i>新借阅
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-light shadow-sm" data-toggle="dropdown" style="border-radius: 10px; width: 42px; height: 42px; padding: 0;">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg" style="border-radius: 12px;">
+                        <button class="dropdown-item text-danger py-2" id="btnClearAllLends">
+                            <i class="fas fa-trash-alt mr-2"></i>清空所有记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+            <div class="card-header bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-3 mb-lg-0">
+                        <ul class="nav nav-pills custom-pills" id="lendsTabs">
+                            <li class="nav-item"><a class="nav-link active" href="#" data-status="">全部</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#" data-status="0">待审核</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#" data-status="1">借出中</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#" data-status="4">已逾期</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#" data-status="3">已归还</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <form id="lendsFilterForm" class="d-flex justify-content-lg-end">
+                            <input type="hidden" name="status" value="">
+                            <div class="search-box mr-2">
+                                <i class="fas fa-search"></i>
+                                <input type="text" name="keyword" class="form-control" placeholder="搜读者/学号/书名...">
+                            </div>
+                            <button type="submit" class="btn btn-dark px-3" style="border-radius: 10px;">筛选</button>
+                            <button type="button" id="resetFilters" class="btn btn-link text-muted">重置</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive" style="max-height: 720px;">
+                <table class="table custom-table mb-0" id="lendsTable">
+                    <thead>
+                        <tr>
+                            <th class="pl-4">学号</th>
+                            <th>读者</th>
+                            <th>图书名称</th>
+                            <th>借阅时间</th>
+                            <th>应还时间</th>
+                            <th>状态</th>
+                            <th class="text-right pr-4">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="7" class="text-center py-5 text-muted">正在加载借阅记录...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">共 <span id="totalCount">0</span> 条记录</div>
+                    <nav><ul class="pagination pagination-sm mb-0" id="lendsPager"></ul></nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="borrowModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+                <div class="modal-header border-0 pt-4 px-4 pb-0">
+                    <div>
+                        <h4 class="modal-title font-weight-bold" style="color: #1e293b;">办理借书</h4>
+                        <p class="text-muted small mb-0">默认借期 7 天，支持批量借阅</p>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="borrowForm">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="selection-panel">
+                                    <div class="panel-header mb-3">
+                                        <i class="fas fa-user-circle mr-2 text-primary"></i>选择读者
+                                    </div>
+                                    <div class="search-input-wrapper mb-3">
+                                        <input type="text" id="readerKeyword" class="form-control" placeholder="输入姓名或学号搜索...">
+                                        <div class="search-dropdown shadow-lg" id="readerSuggest"></div>
+                                    </div>
+                                    <div class="selected-display" id="readerSelected">
+                                        <div class="empty-state">尚未选择读者</div>
+                                    </div>
+                                    <input type="hidden" name="readerId" id="readerId" required>
+                                </div>
+                            </div>
+                            <div class="col-md-1 d-none d-md-flex align-items-center justify-content-center">
+                                <div style="width: 1px; height: 80%; background: #e2e8f0;"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="selection-panel">
+                                    <div class="panel-header mb-3">
+                                        <i class="fas fa-book mr-2 text-info"></i>选择图书
+                                    </div>
+                                    <div class="search-input-wrapper mb-3">
+                                        <input type="text" id="bookKeyword" class="form-control" placeholder="输入书名或作者搜索...">
+                                        <div class="search-dropdown shadow-lg" id="bookSuggest"></div>
+                                    </div>
+                                    <div class="selected-display scrollable" id="bookSelected">
+                                        <div class="empty-state">尚未选择图书</div>
+                                    </div>
+                                    <select name="bookIds" class="d-none" multiple required></select>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="borrowDays" value="7">
+                    </form>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="button" class="btn btn-light px-4" data-dismiss="modal" style="border-radius: 12px;">取消</button>
+                    <button type="button" class="btn btn-primary px-5 shadow" id="btnSubmitBorrow" style="border-radius: 12px; font-weight: 600;">
+                        确认借出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-overlay" id="lendDrawerOverlay"></div>
+    <div class="drawer shadow-lg" id="lendDetailDrawer">
+        <div class="drawer-header">
+            <span>借阅详情</span>
+            <button class="close-drawer"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-body p-4">
+            <div class="detail-section">
+                <h6>读者信息</h6>
+                <div class="detail-item"><span>姓名</span><b id="dReaderName">-</b></div>
+                <div class="detail-item"><span>学号</span><b id="dReaderNo">-</b></div>
+                <div class="detail-item"><span>院系</span><b id="dReaderDept">-</b></div>
+                <div class="detail-item"><span>电话</span><b id="dReaderTel">-</b></div>
+            </div>
+            <div class="detail-section mt-4">
+                <h6>图书信息</h6>
+                <div class="detail-item"><span>书名</span><b id="dBookTitle">-</b></div>
+                <div class="detail-item"><span>借阅数量</span><b>1 本</b></div>
+            </div>
+            <div class="detail-section mt-4">
+                <h6>时间节点</h6>
+                <div class="detail-item"><span>借阅日期</span><span id="dLendDate">-</span></div>
+                <div class="detail-item"><span>应还日期</span><span id="dShouldBack">-</span></div>
+                <div class="detail-item"><span>归还日期</span><span id="dBackDate">-</span></div>
+            </div>
+            <div class="detail-section mt-4">
+                <h6>费用与状态</h6>
+                <div class="detail-item"><span>当前状态</span><span id="dStatusTag">-</span></div>
+                <div class="detail-item"><span>逾期罚金</span><b class="text-danger" id="dFine">¥0.00</b></div>
+            </div>
+            <div class="detail-section mt-4" id="dAuditSection">
+                <h6>审核信息</h6>
+                <div class="detail-item"><span>审核人员</span><span id="dAuditAdmin">-</span></div>
+                <div class="detail-item"><span>审核时间</span><span id="dAuditDate">-</span></div>
+                <div class="detail-item"><span>备注说明</span><span id="dRemarks">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stat-card {
+            background: #fff; border-radius: 16px; padding: 24px; display: flex; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: all 0.3s ease; border: 1px solid #f1f5f9;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); }
+        .stat-icon {
+            width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-right: 20px;
+        }
+        .stat-blue .stat-icon { background: #eff6ff; color: #3b82f6; }
+        .stat-green .stat-icon { background: #f0fdf4; color: #22c55e; }
+        .stat-red .stat-icon { background: #fef2f2; color: #ef4444; }
+        .stat-orange .stat-icon { background: #fff7ed; color: #f97316; }
+        .stat-label { color: #64748b; font-size: 14px; font-weight: 500; }
+        .stat-value { color: #1e293b; font-size: 28px; font-weight: 700; line-height: 1.2; }
+
+        .custom-pills .nav-link {
+            border-radius: 10px; padding: 8px 16px; color: #64748b; font-weight: 500; font-size: 14px;
+        }
+        .custom-pills .nav-link.active { background: #1e293b; color: #fff; }
+        .search-box { position: relative; width: 280px; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box .form-control {
+            padding-left: 36px; border-radius: 10px; background: #f1f5f9; border: none; font-size: 14px;
+        }
+
+        .custom-table thead th {
+            background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569;
+            font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 16px;
+        }
+        .custom-table tbody td { padding: 16px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .custom-table tbody tr:hover { background: #fcfdfe; }
+        .tr-overdue { background: #fff5f5 !important; }
+        
+        .badge-pill { padding: 6px 12px; font-weight: 600; font-size: 12px; }
+        .badge-wait { background: #fff7ed; color: #c2410c; }
+        .badge-lend { background: #eff6ff; color: #1d4ed8; }
+        .badge-overdue { background: #fef2f2; color: #b91c1c; }
+        .badge-done { background: #f0fdf4; color: #15803d; }
+        .badge-refuse { background: #f1f5f9; color: #475569; }
+
+        .selection-panel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; height: 100%; }
+        .panel-header { font-weight: 700; color: #334155; font-size: 16px; }
+        .search-input-wrapper { position: relative; }
+        .search-dropdown {
+            position: absolute; top: 100%; left: 0; right: 0; z-index: 1060; background: #fff;
+            border-radius: 12px; margin-top: 8px; max-height: 280px; overflow-y: auto; display: none;
+        }
+        .search-dropdown.open { display: block; }
+        .suggest-item {
+            padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .suggest-item:hover { background: #f8fafc; }
+        .suggest-item .main { font-weight: 600; color: #1e293b; }
+        .suggest-item .sub { font-size: 12px; color: #94a3b8; }
+        
+        .selected-display {
+            min-height: 120px; background: #fff; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 12px;
+        }
+        .selected-display.scrollable { max-height: 200px; overflow-y: auto; }
+        .empty-state {
+            height: 94px; display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; font-style: italic; font-size: 14px;
+        }
+        
+        .selected-tag {
+            background: #f1f5f9; color: #1e293b; padding: 6px 12px; border-radius: 8px;
+            display: inline-flex; align-items: center; margin: 4px; font-size: 14px; font-weight: 500;
+        }
+        .selected-tag .remove { margin-left: 8px; cursor: pointer; color: #94a3b8; transition: color 0.2s; }
+        .selected-tag .remove:hover { color: #ef4444; }
+
+        body.drawer-open { overflow: hidden; }
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 1070;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease-out;
+        }
+        .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 460px;
+            max-width: 92vw;
+            height: 100%;
+            background: #fff;
+            z-index: 1080;
+            transform: translateX(110%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+            border-top-left-radius: 18px;
+            border-bottom-left-radius: 18px;
+            overflow: hidden;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: #0f172a;
+            background: linear-gradient(180deg, rgba(99,102,241,0.10) 0%, rgba(255,255,255,1) 100%);
+        }
+        .close-drawer { border: none; background: none; font-size: 20px; color: #94a3b8; cursor: pointer; }
+        .detail-section h6 {
+            font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 16px; border-left: 3px solid #3b82f6; padding-left: 10px;
+        }
+        .detail-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .detail-item span { color: #64748b; }
+        .detail-item b { color: #1e293b; }
+
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
+            justify-content: center; color: #64748b; transition: all 0.2s;
+        }
+        .action-btn:hover { background: #f1f5f9; color: #1e293b; }
+    </style>
+</div>
+
+<script>
+    (function(){
+        const $root = $('#fragmentLends');
+        const $table = $('#lendsTable');
+        const $tbody = $table.find('tbody');
+        const $form = $('#lendsFilterForm');
+        const $pager = $('#lendsPager');
+        
+        let currentPage = 1;
+        let pageSize = 10;
+        let totalCount = 0;
+        let isLoading = false;
+        
+        function init(){
+            renderLends(1);
+            bindEvents();
+        }
+
+        function renderLends(page = 1){
+            if(isLoading) return;
+            isLoading = true;
+            currentPage = page;
+            
+            const keyword = $form.find('[name="keyword"]').val().trim();
+            const params = { page: page, limit: pageSize };
+            const statusVal = $form.find('[name="status"]').val();
+            if (statusVal !== '' && statusVal !== null && statusVal !== undefined) {
+                params.status = statusVal;
+            }
+            if (keyword) {
+                params.readerName = keyword;
+                params.bookName = keyword;
+            }
+
+            $.get('/api/lend/list', params).done(resp => {
+                isLoading = false;
+                if(resp.code !== 0){
+                    $tbody.html(`<tr><td colspan="7" class="text-center py-5 text-danger">${resp.msg || '获取数据失败'}</td></tr>`);
+                    return;
+                }
+                
+                totalCount = resp.count;
+                $('#totalCount').text(totalCount);
+                renderTableBody(resp.data);
+                renderPagination();
+            }).fail(() => {
+                isLoading = false;
+                $tbody.html(`<tr><td colspan="7" class="text-center py-5 text-danger">请求服务器失败</td></tr>`);
+            });
+        }
+
+        function renderTableBody(list){
+            if(!list || list.length === 0){
+                $tbody.html(`<tr><td colspan="7" class="text-center py-5 text-muted">暂无相关借阅记录</td></tr>`);
+                return;
+            }
+
+            let html = '';
+            list.forEach(item => {
+                const status = item.status;
+                const isOverdue = (status === 4);
+                
+                html += `
+                    <tr class="${isOverdue ? 'tr-overdue' : ''}" data-id="${item.id}">
+                        <td class="pl-4"><span class="font-weight-bold text-dark">${item.readerNumber || '-'}</span></td>
+                        <td>${item.readerName || '-'}</td>
+                        <td style="max-width: 200px;" class="text-truncate">${item.bookTitle || '-'}</td>
+                        <td><span class="text-muted small">${formatDate(item.lendDate)}</span></td>
+                        <td><span class="${isOverdue ? 'text-danger font-weight-bold' : 'text-muted'} small">${formatDate(item.shouldBackDate)}</span></td>
+                        <td>${renderStatusBadge(status, item.fineAmount)}</td>
+                        <td class="text-right pr-4">
+                            <div class="dropdown">
+                                <button class="btn btn-link action-btn p-0" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg py-2" style="border-radius: 12px;">
+                                    <button class="dropdown-item py-2 action-detail"><i class="far fa-list-alt mr-2"></i>详情</button>
+                                    ${status === 0 ? `
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item py-2 text-primary action-audit-ok"><i class="fas fa-check mr-2"></i>同意借出</button>
+                                        <button class="dropdown-item py-2 text-danger action-audit-no"><i class="fas fa-times mr-2"></i>拒绝申请</button>
+                                    ` : ''}
+                                    ${(status === 1 || status === 4) ? `
+                                        <div class="dropdown-divider"></div>
+                                        <button class="dropdown-item py-2 text-success action-return"><i class="fas fa-undo mr-2"></i>确认归还</button>
+                                        <button class="dropdown-item py-2 text-info action-extend"><i class="fas fa-history mr-2"></i>申请延期</button>
+                                    ` : ''}
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item py-2 text-danger action-delete"><i class="far fa-trash-alt mr-2"></i>删除记录</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            $tbody.html(html);
+        }
+
+        function renderStatusBadge(status, fine){
+            const map = {
+                0: { text: '待审核', cls: 'badge-wait' },
+                1: { text: '借出中', cls: 'badge-lend' },
+                2: { text: '已拒绝', cls: 'badge-refuse' },
+                3: { text: '已归还', cls: 'badge-done' },
+                4: { text: '已逾期', cls: 'badge-overdue' },
+                5: { text: '已损坏', cls: 'badge-refuse' }
+            };
+            const config = map[status] || { text: '未知', cls: 'badge-secondary' };
+            let html = `<span class="badge badge-pill ${config.cls}">${config.text}</span>`;
+            if(fine > 0){
+                html += ` <span class="badge badge-pill badge-danger shadow-sm">¥${fine.toFixed(2)}</span>`;
+            }
+            return html;
+        }
+
+        function renderPagination(){
+            const totalPages = Math.ceil(totalCount / pageSize);
+            $pager.empty();
+            if(totalPages <= 1) return;
+
+            $pager.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link border-0" href="#" data-page="${currentPage - 1}">PREV</a></li>`);
+            
+            for(let i = 1; i <= totalPages; i++){
+                if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)){
+                    $pager.append(`<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link border-0 mx-1" href="#" data-page="${i}" style="border-radius: 8px;">${i}</a></li>`);
+                } else if(i === currentPage - 2 || i === currentPage + 2){
+                    $pager.append(`<li class="page-item disabled"><span class="page-link border-0">...</span></li>`);
+                }
+            }
+
+            $pager.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link border-0" href="#" data-page="${currentPage + 1}">NEXT</a></li>`);
+        }
+
+        function bindEvents(){
+            $pager.on('click', 'a', function(e){
+                e.preventDefault();
+                const p = $(this).data('page');
+                if(p && p !== currentPage) renderLends(p);
+            });
+
+            $('#lendsTabs .nav-link').click(function(e){
+                e.preventDefault();
+                $('#lendsTabs .nav-link').removeClass('active');
+                $(this).addClass('active');
+                $form.find('[name="status"]').val($(this).data('status'));
+                renderLends(1);
+            });
+
+            $form.on('submit', e => { e.preventDefault(); renderLends(1); });
+            $('#resetFilters').click(() => {
+                $form[0].reset();
+                $form.find('[name="status"]').val('');
+                $('#lendsTabs .nav-link').removeClass('active').first().addClass('active');
+                renderLends(1);
+            });
+
+            $tbody.on('click', '.action-detail', function(){
+                const id = $(this).closest('tr').data('id');
+                showDetailDrawer(id);
+            });
+
+            $tbody.on('click', '.action-audit-ok', function(){
+                const id = $(this).closest('tr').data('id');
+                handleAudit(id, 1);
+            });
+
+            $tbody.on('click', '.action-audit-no', async function(){
+                const id = $(this).closest('tr').data('id');
+                const reason = await window.ui.prompt('请输入拒绝理由', '拒绝申请', '', '例如：信息不完整');
+                if(reason !== null) handleAudit(id, 2, reason);
+            });
+
+            $tbody.on('click', '.action-return', async function(){
+                const id = $(this).closest('tr').data('id');
+                const ok = await window.ui.confirm('确认图书已完好归还？', '确认归还');
+                if(ok) handleReturn(id);
+            });
+
+            $tbody.on('click', '.action-extend', async function(){
+                const id = $(this).closest('tr').data('id');
+                const days = await window.ui.prompt('请输入延期天数(1-30)', '申请延期', '7', '1-30');
+                if(days) handleExtend(id, days);
+            });
+
+            $tbody.on('click', '.action-delete', async function(){
+                const id = $(this).closest('tr').data('id');
+                const ok = await window.ui.confirm('确定要删除这条借阅记录吗？不可恢复！', '删除记录');
+                if(ok) handleDelete(id);
+            });
+
+            $('#btnShowBorrowModal').click(() => {
+                resetBorrowForm();
+                $('#borrowModal').modal('show');
+            });
+
+            $('#btnSubmitBorrow').click(submitBorrow);
+
+            $('#btnClearAllLends').click(async () => {
+                const ok = await window.ui.confirm('此操作将清空所有借阅历史，并重置所有读者和图书的借阅计数。确定继续吗？', '危险操作', '继续', '取消');
+                if(ok){
+                    $.post('/api/lend/clearAll').done(resp => {
+                        if(resp.code === 0){
+                            window.ui.toast('所有记录已清空', 'success');
+                            init();
+                        } else {
+                            window.ui.toast(resp.msg || '操作失败', 'danger');
+                        }
+                    });
+                }
+            });
+
+            $('.close-drawer, #lendDrawerOverlay').click(closeDetailDrawer);
+
+            setupRealtimeSearch();
+        }
+
+        function handleAudit(id, status, remarks = ''){
+            $.post(`/api/lend/audit/${id}`, { status, remarks }).done(resp => {
+                if(resp.code === 0){
+                    window.ui.toast(status === 1 ? '已同意借出' : '已拒绝申请', 'success');
+                    init();
+                } else {
+                    window.ui.toast(resp.msg || '操作失败', 'danger');
+                }
+            });
+        }
+
+        function handleReturn(id){
+            $.post(`/api/lend/return/${id}`).done(resp => {
+                if(resp.code === 0){
+                    window.ui.toast('归还成功', 'success');
+                    init();
+                } else {
+                    window.ui.toast(resp.msg || '操作失败', 'danger');
+                }
+            });
+        }
+
+        function handleExtend(id, days){
+            $.post(`/api/lend/extend/${id}`, { days }).done(resp => {
+                if(resp.code === 0){
+                    window.ui.toast('延期成功', 'success');
+                    init();
+                } else {
+                    window.ui.toast(resp.msg || '操作失败', 'danger');
+                }
+            });
+        }
+
+        function handleDelete(id){
+            $.ajax({
+                url: `/api/lend/${id}`,
+                type: 'DELETE'
+            }).done(resp => {
+                if(resp.code === 0){
+                    window.ui.toast('记录已删除', 'success');
+                    init();
+                } else {
+                    window.ui.toast(resp.msg || '操作失败', 'danger');
+                }
+            });
+        }
+
+        let readerList = [];
+        let bookList = [];
+        let selectedReader = null;
+        let selectedBooks = new Map();
+
+        function setupRealtimeSearch(){
+            $.get('/api/reader/list', { limit: 1000 }).done(resp => { if(resp.code===0) readerList = resp.data; });
+            $.get('/api/book/list', { limit: 1000 }).done(resp => { if(resp.code===0) bookList = resp.data; });
+
+            $('#readerKeyword').on('input', function(){
+                const k = $(this).val().trim().toLowerCase();
+                const $drop = $('#readerSuggest');
+                if(!k){ $drop.removeClass('open'); return; }
+                
+                const matches = readerList.filter(r => 
+                    (r.realName || '').toLowerCase().includes(k) || 
+                    (r.readerNumber || '').toLowerCase().includes(k)
+                ).slice(0, 8);
+
+                if(matches.length > 0){
+                    let html = '';
+                    matches.forEach(r => {
+                        html += `
+                            <div class="suggest-item" data-id="${r.id}">
+                                <div class="main">${r.realName}</div>
+                                <div class="sub">${r.readerNumber}</div>
+                            </div>
+                        `;
+                    });
+                    $drop.html(html).addClass('open');
+                } else {
+                    $drop.html('<div class="p-3 text-muted small">未找到匹配读者</div>').addClass('open');
+                }
+            });
+
+            $('#bookKeyword').on('input', function(){
+                const k = $(this).val().trim().toLowerCase();
+                const $drop = $('#bookSuggest');
+                if(!k){ $drop.removeClass('open'); return; }
+
+                const matches = bookList.filter(b => 
+                    b.status === 0 && (
+                        (b.name || '').toLowerCase().includes(k) || 
+                        (b.author || '').toLowerCase().includes(k)
+                    )
+                ).slice(0, 8);
+
+                if(matches.length > 0){
+                    let html = '';
+                    matches.forEach(b => {
+                        const stock = (b.stock || 0) - (b.borrowCount || 0);
+                        html += `
+                            <div class="suggest-item" data-id="${b.id}">
+                                <div class="main">${b.name}</div>
+                                <div class="sub">${b.author} | 余 ${stock}</div>
+                            </div>
+                        `;
+                    });
+                    $drop.html(html).addClass('open');
+                } else {
+                    $drop.html('<div class="p-3 text-muted small">未找到可用图书</div>').addClass('open');
+                }
+            });
+
+            $('#readerSuggest').on('click', '.suggest-item', function(){
+                const id = $(this).data('id');
+                selectedReader = readerList.find(r => r.id == id);
+                $('#readerId').val(id);
+                $('#readerKeyword').val('');
+                $('#readerSuggest').removeClass('open');
+                renderSelectedReader();
+            });
+
+            $('#bookSuggest').on('click', '.suggest-item', function(){
+                const id = $(this).data('id');
+                const book = bookList.find(b => b.id == id);
+                if(book){
+                    selectedBooks.set(id, book);
+                    renderSelectedBooks();
+                }
+                $('#bookKeyword').val('');
+                $('#bookSuggest').removeClass('open');
+            });
+
+            $(document).on('click', e => {
+                if(!$(e.target).closest('.search-input-wrapper').length){
+                    $('.search-dropdown').removeClass('open');
+                }
+            });
+        }
+
+        function renderSelectedReader(){
+            const $box = $('#readerSelected');
+            if(!selectedReader){
+                $box.html('<div class="empty-state">尚未选择读者</div>');
+                return;
+            }
+            $box.html(`
+                <div class="selected-tag">
+                    <i class="fas fa-user-check mr-2 text-primary"></i>
+                    ${selectedReader.realName} (${selectedReader.readerNumber})
+                    <span class="remove" onclick="window.clearReader()">&times;</span>
+                </div>
+            `);
+        }
+        window.clearReader = () => { selectedReader = null; $('#readerId').val(''); renderSelectedReader(); };
+
+        function renderSelectedBooks(){
+            const $box = $('#bookSelected');
+            const $sel = $('#borrowForm select[name="bookIds"]');
+            $sel.empty();
+            
+            if(selectedBooks.size === 0){
+                $box.html('<div class="empty-state">尚未选择图书</div>');
+                return;
+            }
+
+            let html = '';
+            selectedBooks.forEach((book, id) => {
+                html += `
+                    <div class="selected-tag">
+                        <i class="fas fa-book mr-2 text-info"></i>
+                        ${book.name}
+                        <span class="remove" onclick="window.removeBook(${id})">&times;</span>
+                    </div>
+                `;
+                $sel.append(`<option value="${id}" selected>${book.name}</option>`);
+            });
+            $box.html(html);
+        }
+        window.removeBook = (id) => { selectedBooks.delete(id); renderSelectedBooks(); };
+
+        function resetBorrowForm(){
+            selectedReader = null;
+            selectedBooks.clear();
+            $('#borrowForm')[0].reset();
+            $('#readerId').val('');
+            renderSelectedReader();
+            renderSelectedBooks();
+        }
+
+        function submitBorrow(){
+            const readerId = $('#readerId').val();
+            const bookIds = $('#borrowForm select[name="bookIds"]').val();
+            
+            if(!readerId){ window.ui.toast('请先选择读者', 'warning'); return; }
+            if(!bookIds || bookIds.length === 0){ window.ui.toast('请至少选择一本图书', 'warning'); return; }
+
+            const $btn = $('#btnSubmitBorrow');
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>处理中...');
+
+            const url = bookIds.length > 1 ? '/api/lend/borrowBatch' : '/api/lend/borrow';
+            const borrowDays = 7;
+            
+            let ajaxData;
+            let contentType = 'application/x-www-form-urlencoded';
+
+            if(bookIds.length > 1){
+                ajaxData = JSON.stringify(bookIds);
+                contentType = 'application/json';
+            } else {
+                ajaxData = { readerId: readerId, bookId: bookIds[0], borrowDays: borrowDays };
+            }
+
+            $.ajax({
+                url: url + (bookIds.length > 1 ? `?readerId=${readerId}&borrowDays=${borrowDays}` : ''),
+                type: 'POST',
+                data: ajaxData,
+                contentType: contentType
+            }).done(resp => {
+                if(resp.code === 0){
+                    $('#borrowModal').modal('hide');
+                    window.ui.toast('借书成功', 'success');
+                    init();
+                } else {
+                    window.ui.toast(resp.msg || '借书失败', 'danger');
+                }
+            }).always(() => {
+                $btn.prop('disabled', false).text('确认借出');
+            });
+        }
+
+        function showDetailDrawer(id){
+            $.get(`/api/lend/${id}`).done(resp => {
+                if(resp.code === 0){
+                    const d = resp.data;
+                    $('#dReaderName').text(d.readerName || '-');
+                    $('#dReaderNo').text(d.readerNumber || '-');
+                    $('#dReaderDept').text(d.readerDepartment || '-');
+                    $('#dReaderTel').text(d.readerTel || '-');
+                    $('#dBookTitle').text(d.bookTitle || '-');
+                    $('#dLendDate').text(formatDate(d.lendDate, true));
+                    $('#dShouldBack').text(formatDate(d.shouldBackDate));
+                    $('#dBackDate').text(formatDate(d.backDate, true));
+                    $('#dStatusTag').html(renderStatusBadge(d.status, 0));
+                    $('#dFine').text(`¥${(d.fineAmount || 0).toFixed(2)}`);
+                    
+                    if(d.status === 0 || d.auditAdminId){
+                        $('#dAuditSection').show();
+                        $('#dAuditAdmin').text(d.auditAdminName || '-');
+                        $('#dAuditDate').text(formatDate(d.auditDate, true));
+                        $('#dRemarks').text(d.exceptRemarks || '-');
+                    } else {
+                        $('#dAuditSection').hide();
+                    }
+                    
+                    $('#lendDrawerOverlay').addClass('show');
+                    $('#lendDetailDrawer').addClass('open');
+                    document.body.classList.add('drawer-open');
+                }
+            });
+        }
+
+        function closeDetailDrawer(){
+            $('#lendDrawerOverlay').removeClass('show');
+            $('#lendDetailDrawer').removeClass('open');
+            document.body.classList.remove('drawer-open');
+        }
+
+        function formatDate(dateStr, showTime = false){
+            if(!dateStr) return '-';
+            const date = new Date(dateStr);
+            if(isNaN(date.getTime())) return '-';
+            
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            
+            if(!showTime) return `${y}-${m}-${d}`;
+            
+            const hh = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d} ${hh}:${mm}`;
+        }
+
+        init();
+
+    })();
+</script>

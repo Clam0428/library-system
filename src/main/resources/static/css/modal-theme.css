@@ -1,0 +1,198 @@
+html, body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+    --modal-ink: #0f172a;
+    --modal-muted: #64748b;
+    --modal-border: rgba(17, 24, 39, 0.10);
+    --modal-surface: #ffffff;
+    --modal-soft: #f1f5f9;
+    --modal-shadow: 0 28px 70px rgba(17, 24, 39, 0.20);
+    --modal-ring: 0 0 0 0.22rem rgba(91, 57, 245, 0.18);
+    --modal-primary: #3b82f6;
+    --modal-primary-2: #6366f1;
+    --modal-success: #22c55e;
+    --modal-success-2: #16a34a;
+    --modal-danger: #ef4444;
+    --modal-danger-2: #f97316;
+    --modal-warning: #f59e0b;
+    --modal-warning-2: #fbbf24;
+}
+
+.modal-backdrop.show {
+    opacity: 0.45;
+}
+
+.modal .modal-dialog {
+    margin: 1.2rem auto;
+}
+
+.modal .modal-dialog {
+    max-width: 720px;
+    width: calc(100% - 2.4rem);
+}
+
+.modal .modal-dialog.modal-sm { max-width: 460px; }
+.modal .modal-dialog.modal-lg { max-width: 720px; }
+.modal .modal-dialog.modal-xl { max-width: 920px; }
+
+.modal .modal-dialog.modal-unified {
+    max-width: 780px !important;
+    width: calc(100% - 2.4rem) !important;
+    height: 82vh;
+}
+
+.modal .modal-dialog.modal-unified .modal-content {
+    height: 100%;
+    max-height: 82vh !important;
+}
+
+#uiDialogModal .modal-dialog {
+    max-width: 420px !important;
+}
+
+#uiDialogModal .modal-body {
+    padding: 14px 18px 8px;
+}
+
+#uiDialogModal .modal-footer {
+    padding: 12px 18px 18px;
+}
+
+.modal .modal-content { max-height: 86vh; }
+
+.modal .modal-content {
+    border: none;
+    border-radius: 22px !important;
+    box-shadow: var(--modal-shadow) !important;
+    overflow: hidden !important;
+    background: var(--modal-surface) !important;
+}
+
+.modal .modal-header {
+    border: none;
+    padding: 18px 22px;
+    background: linear-gradient(180deg, rgba(91, 57, 245, 0.10) 0%, rgba(255,255,255,1) 100%);
+}
+
+.modal .modal-header .modal-title {
+    font-weight: 900;
+    letter-spacing: -0.2px;
+    color: var(--modal-ink);
+}
+
+.modal .modal-header.text-white,
+.modal .modal-header.text-white .modal-title,
+.modal .modal-header .close.text-white {
+    color: var(--modal-ink) !important;
+}
+
+.modal .modal-header.text-white .close {
+    opacity: 0.85;
+}
+
+.modal .modal-header.text-white .close:hover {
+    opacity: 1;
+}
+
+.modal .modal-header.bg-primary,
+.modal .modal-header.bg-success,
+.modal .modal-header.bg-danger,
+.modal .modal-header.bg-warning,
+.modal .modal-header.bg-info,
+.modal .modal-header.bg-dark {
+    background: linear-gradient(180deg, rgba(91, 57, 245, 0.10) 0%, rgba(255,255,255,1) 100%) !important;
+    color: var(--modal-ink) !important;
+}
+
+.modal .modal-header .close {
+    opacity: 0.85;
+    outline: none;
+    text-shadow: none;
+}
+
+.modal .modal-header.bg-primary .close,
+.modal .modal-header.bg-success .close,
+.modal .modal-header.bg-danger .close,
+.modal .modal-header.bg-warning .close,
+.modal .modal-header.bg-info .close,
+.modal .modal-header.bg-dark .close {
+    color: var(--modal-ink);
+}
+
+.modal .modal-body {
+    padding: 18px 22px 10px;
+    overflow-y: auto;
+}
+
+.modal .modal-footer {
+    border: none;
+    padding: 14px 22px 22px;
+    background: var(--modal-surface);
+}
+
+.modal .form-control,
+.modal .custom-select,
+.modal .form-control-plaintext {
+    border: none;
+    background: var(--modal-soft);
+    border-radius: 12px;
+}
+
+.modal .form-control,
+.modal .custom-select {
+    height: 44px;
+    font-size: 14px;
+}
+
+.modal textarea.form-control {
+    height: auto;
+    min-height: 110px;
+}
+
+.modal .form-control:focus,
+.modal .custom-select:focus {
+    outline: none;
+    box-shadow: var(--modal-ring);
+    background: #fff;
+}
+
+.modal .btn {
+    border-radius: 999px;
+}
+
+.modal .btn-secondary {
+    border: none;
+    background: rgba(17,24,39,0.08);
+    color: rgba(17,24,39,0.85);
+}
+
+.modal .btn-light {
+    border: none;
+    background: rgba(17,24,39,0.06);
+    color: rgba(17,24,39,0.85);
+}
+
+.modal .btn-primary {
+    border: none;
+}
+
+.modal .btn:focus {
+    outline: none;
+    box-shadow: var(--modal-ring);
+}
+
+.modal label {
+    color: rgba(17, 24, 39, 0.70);
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 576px) {
+    .modal .modal-header { padding: 16px 16px; }
+    .modal .modal-body { padding: 16px 16px 10px; }
+    .modal .modal-footer { padding: 12px 16px 16px; }
+}

@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理系统 - 首页</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.6.0/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/modal-theme.css}">
+    <style>
+        :root {
+            --brand: #5B39F5;
+            --ink: #111827;
+            --muted: #6B7280;
+            --ring: 0 0 0 0.22rem rgba(91, 57, 245, 0.18);
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            background: #e9e9e9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .auth-shell {
+            width: min(1100px, 100%);
+            margin: 0;
+            background: #fff;
+            border-radius: 26px;
+            box-shadow: 0 24px 50px rgba(17, 24, 39, 0.16);
+            overflow: hidden;
+        }
+
+        .auth-grid {
+            min-height: 640px;
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 992px) {
+            .auth-grid {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+
+        .auth-left {
+            position: relative;
+            display: none;
+            color: #111;
+            background: #f2f2f2;
+            overflow: hidden;
+            padding: 56px 56px 40px 56px;
+        }
+
+        @media (min-width: 992px) {
+            .auth-left {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+
+        .characters-stage {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 520px;
+        }
+
+        .characters {
+            position: relative;
+            width: 560px;
+            height: 420px;
+        }
+
+        .char {
+            position: absolute;
+            bottom: 0;
+            transform-origin: bottom center;
+            transition: transform 650ms ease-in-out, height 650ms ease-in-out, left 650ms ease-in-out;
+            will-change: transform, height, left;
+        }
+
+        .char .eyes {
+            position: absolute;
+            display: flex;
+            transition: left 650ms ease-in-out, top 650ms ease-in-out;
+            will-change: left, top;
+        }
+
+        .eyeball {
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: height 150ms ease;
+        }
+
+        .eyeball .pupil {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #2D2D2D;
+            transform: translate(var(--px, 0px), var(--py, 0px));
+            transition: transform 90ms ease-out;
+        }
+
+        .pupil-only {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #2D2D2D;
+            transform: translate(var(--px, 0px), var(--py, 0px));
+            transition: transform 90ms ease-out;
+        }
+
+        .mouth-line {
+            position: absolute;
+            height: 4px;
+            width: 80px;
+            background: #2D2D2D;
+            border-radius: 999px;
+            transition: left 200ms ease-out, top 200ms ease-out, transform 200ms ease-out;
+        }
+
+        .char-purple {
+            left: 70px;
+            width: 180px;
+            height: 400px;
+            background: #6C3FF5;
+            border-radius: 10px 10px 0 0;
+            z-index: 1;
+        }
+
+        .char-black {
+            left: 245px;
+            width: 120px;
+            height: 310px;
+            background: #2D2D2D;
+            border-radius: 8px 8px 0 0;
+            z-index: 2;
+        }
+
+        .char-orange {
+            left: 0px;
+            width: 240px;
+            height: 200px;
+            background: #FF9B6B;
+            border-radius: 120px 120px 0 0;
+            z-index: 3;
+        }
+
+        .char-yellow {
+            left: 315px;
+            width: 140px;
+            height: 230px;
+            background: #E8D754;
+            border-radius: 70px 70px 0 0;
+            z-index: 4;
+        }
+
+        .fx-shake {
+            animation: fxShake 600ms ease-in-out;
+        }
+
+        @keyframes fxShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .auth-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px;
+            background: #fff;
+        }
+
+        .login-container {
+            background: #fff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: none;
+            padding: 24px 28px 28px;
+            max-width: 380px;
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: none;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .login-header h1 {
+            color: var(--ink);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.4px;
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .form-group label {
+            color: rgba(17, 24, 39, 0.86);
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .line-input {
+            border: none;
+            border-bottom: 1.6px solid rgba(17, 24, 39, 0.28);
+            border-radius: 0;
+            height: 44px;
+            background: transparent;
+            padding-left: 0;
+            padding-right: 40px;
+            transition: border-color 160ms ease;
+        }
+
+        .line-input:focus {
+            outline: none;
+            box-shadow: none;
+            border-color: #111;
+        }
+
+        .btn-login {
+            height: 48px;
+            border-radius: 999px;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 16px;
+            background: #111;
+            border: none;
+        }
+
+        .input-with-action {
+            position: relative;
+        }
+
+        .input-action-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: rgba(17,24,39,0.55);
+            padding: 6px 8px;
+            border-radius: 6px;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        .input-action-btn:hover {
+            color: rgba(17,24,39,0.86);
+            background: rgba(17,24,39,0.06);
+        }
+
+        .input-action-btn:focus {
+            outline: none;
+            box-shadow: var(--ring);
+        }
+
+        .btn-register-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(91,57,245,0.95);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-register-link:hover {
+            text-decoration: underline;
+        }
+
+        .modal-body {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .btn-primary {
+            background: #111;
+            border: none;
+            box-shadow: none;
+            transition: filter 160ms ease;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.06);
+        }
+
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-contacts-auto-fill-button,
+        input[type="password"]::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            display: none !important;
+            pointer-events: none;
+            position: absolute;
+            right: 0;
+        }
+
+        .nav-tabs .nav-item .nav-link {
+            padding: 8px 12px;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid rgba(17,24,39,0.10);
+            gap: 6px;
+        }
+
+        .nav-tabs .nav-link {
+            border: none !important;
+            border-radius: 12px;
+            color: rgba(17,24,39,0.62);
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 160ms ease, color 160ms ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(17,24,39,0.04);
+            color: rgba(17,24,39,0.86);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: rgba(91,57,245,0.10);
+            color: rgba(91,57,245,1);
+        }
+
+        .tab-pane { padding-top: 10px; }
+
+        .border-top {
+            border-top: 1px solid rgba(17,24,39,0.08) !important;
+        }
+
+        .modal-modern .modal-dialog { max-width: 720px; }
+        .modal-modern .modal-content {
+            border: none;
+            border-radius: 22px;
+            box-shadow: 0 28px 70px rgba(17, 24, 39, 0.20);
+            overflow: hidden;
+        }
+        .modal-modern .modal-header {
+            border: none;
+            padding: 18px 22px;
+            background: linear-gradient(180deg, rgba(91, 57, 245, 0.10) 0%, rgba(255,255,255,1) 100%);
+        }
+        .modal-modern .modal-title {
+            font-weight: 900;
+            letter-spacing: -0.2px;
+            color: var(--ink);
+        }
+        .modal-modern .modal-subtitle {
+            margin-top: 2px;
+            font-size: 12px;
+            color: rgba(17, 24, 39, 0.55);
+        }
+        .modal-modern .modal-body { padding: 18px 22px 10px; }
+        .modal-modern .modal-footer {
+            border: none;
+            padding: 14px 22px 22px;
+            background: #fff;
+        }
+        .modal-modern .form-control,
+        .modal-modern .custom-select {
+            border: none;
+            background: #f1f5f9;
+            border-radius: 12px;
+            height: 44px;
+            font-size: 14px;
+        }
+        .modal-modern textarea.form-control { height: auto; }
+        .modal-modern .form-control:focus,
+        .modal-modern .custom-select:focus {
+            outline: none;
+            box-shadow: var(--ring);
+            background: #fff;
+        }
+        .modal-modern .close {
+            opacity: 0.8;
+            outline: none;
+        }
+        .modal-modern .close:hover { opacity: 1; }
+        .modal-modern .btn-secondary {
+            border: none;
+            background: rgba(17,24,39,0.08);
+            color: rgba(17,24,39,0.85);
+            border-radius: 999px;
+            height: 44px;
+            padding: 0 18px;
+        }
+        .modal-modern .btn-primary {
+            border-radius: 999px;
+            height: 44px;
+            padding: 0 22px;
+        }
+        .modal-modern .req-star { color: #ef4444; margin-left: 4px; }
+        .modal-modern .reg-msg {
+            display: none;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.20);
+            background: rgba(239, 68, 68, 0.08);
+            color: rgba(239, 68, 68, 0.95);
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container { padding: 20px; }
+            .login-header h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-shell">
+        <div class="auth-grid">
+            <section class="auth-left" aria-hidden="true">
+                <div class="characters-stage">
+                    <div class="characters" id="characters">
+                        <div class="char char-purple" id="charPurple">
+                            <div class="eyes" id="purpleEyes" style="gap:32px; left:45px; top:40px;">
+                                <div class="eyeball" id="purpleEyeL"><div class="pupil" id="purplePupilL"></div></div>
+                                <div class="eyeball" id="purpleEyeR"><div class="pupil" id="purplePupilR"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="char char-black" id="charBlack">
+                            <div class="eyes" id="blackEyes" style="gap:24px; left:26px; top:32px;">
+                                <div class="eyeball" id="blackEyeL" style="width:16px;height:16px;"><div class="pupil" id="blackPupilL" style="width:6px;height:6px;"></div></div>
+                                <div class="eyeball" id="blackEyeR" style="width:16px;height:16px;"><div class="pupil" id="blackPupilR" style="width:6px;height:6px;"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="char char-orange" id="charOrange">
+                            <div class="eyes" id="orangeEyes" style="gap:32px; left:82px; top:90px;">
+                                <div class="pupil-only" id="orangePupilL"></div>
+                                <div class="pupil-only" id="orangePupilR"></div>
+                            </div>
+                        </div>
+
+                        <div class="char char-yellow" id="charYellow">
+                            <div class="eyes" id="yellowEyes" style="gap:24px; left:52px; top:40px;">
+                                <div class="pupil-only" id="yellowPupilL"></div>
+                                <div class="pupil-only" id="yellowPupilR"></div>
+                            </div>
+                            <div class="mouth-line" id="yellowMouth" style="left:40px; top:88px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="auth-right">
+                <div class="login-container">
+                    <div class="login-header">
+                        <h1>Welcome!</h1>
+                        <p>图书管理系统</p>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="admin-tab" data-toggle="tab" href="#admin-login" role="tab">管理员登录</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="reader-tab" data-toggle="tab" href="#reader-login" role="tab">读者登录</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="admin-login" role="tabpanel">
+                            <form id="adminLoginForm">
+                                <div class="form-group">
+                                    <label for="adminUsername">用户名</label>
+                                    <input type="text" class="form-control line-input" id="adminUsername" placeholder="Username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminPassword">密码</label>
+                                    <div class="input-with-action">
+                                        <input type="password" class="form-control line-input" id="adminPassword" placeholder="Password" required>
+                                        <button type="button" class="input-action-btn" id="toggleAdminPassword" aria-label="显示或隐藏密码">👁</button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-login">登录</button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="reader-login" role="tabpanel">
+                            <form id="readerLoginForm">
+                                <div class="form-group">
+                                    <label for="readerNumber">学号</label>
+                                    <input type="text" class="form-control line-input" id="readerNumber" placeholder="Username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="readerPassword">密码</label>
+                                    <div class="input-with-action">
+                                        <input type="password" class="form-control line-input" id="readerPassword" placeholder="Password" required>
+                                        <button type="button" class="input-action-btn" id="toggleReaderPassword" aria-label="显示或隐藏密码">👁</button>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-login">登录</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3 pt-2 border-top">
+                        <a href="#" class="btn-register-link" data-toggle="modal" data-target="#registerModal" style="margin-top:0">没有读者账号？立即点击注册</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="modal fade modal-modern" id="registerModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <div class="modal-title">读者注册</div>
+                        <div class="modal-subtitle">注册成功后即可使用读者端功能</div>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>学号<span class="req-star">*</span></label>
+                                <input type="text" class="form-control" id="regReaderNumber" placeholder="请输入学号" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>真实姓名<span class="req-star">*</span></label>
+                                <input type="text" class="form-control" id="regRealName" placeholder="请输入真实姓名" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>密码<span class="req-star">*</span></label>
+                                <input type="password" class="form-control" id="regPassword" placeholder="请输入密码" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>性别</label>
+                                <select class="custom-select" id="regSex">
+                                    <option value="1">男</option>
+                                    <option value="2">女</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>院系<span class="req-star">*</span></label>
+                            <select class="custom-select" id="regDepartment" required>
+                                <option value="">请选择院系</option>
+                                <option value="建筑学院">01 建筑学院</option>
+                                <option value="土木工程系">02 土木工程系</option>
+                                <option value="水利水电工程系">03 水利水电工程系</option>
+                                <option value="环境学院">04 环境学院</option>
+                                <option value="机械工程系">05 机械工程系</option>
+                                <option value="精密仪器系">06 精密仪器系</option>
+                                <option value="能源与动力工程系">07 能源与动力工程系</option>
+                                <option value="车辆与运载学院">08 车辆与运载学院</option>
+                                <option value="工业工程系">09 工业工程系</option>
+                                <option value="电机工程与应用电子技术系">10 电机工程与应用电子技术系</option>
+                                <option value="电子工程系">11 电子工程系</option>
+                                <option value="计算机科学与技术系">12 计算机科学与技术系</option>
+                                <option value="自动化系">13 自动化系</option>
+                                <option value="集成电路学院">14 集成电路学院</option>
+                                <option value="航天航空学院">15 航天航空学院</option>
+                                <option value="工程物理系">16 工程物理系</option>
+                                <option value="化学工程系">17 化学工程系</option>
+                                <option value="材料学院">18 材料学院</option>
+                                <option value="数学科学系">19 数学科学系</option>
+                                <option value="物理系">20 物理系</option>
+                                <option value="化学系">21 化学系</option>
+                                <option value="生命科学学院">22 生命科学学院</option>
+                                <option value="地球系统科学系">23 地球系统科学系</option>
+                                <option value="经管学院">24 经管学院</option>
+                                <option value="公共管理学院">25 公共管理学院</option>
+                                <option value="金融学院">26 金融学院</option>
+                                <option value="人文学院">27 人文学院</option>
+                                <option value="社会科学学院">28 社会科学学院</option>
+                                <option value="法学院">29 法学院</option>
+                                <option value="新闻与传播学院">30 新闻与传播学院</option>
+                                <option value="美术学院">31 美术学院</option>
+                                <option value="医学院">32 医学院</option>
+                                <option value="交叉信息研究院">33 交叉信息研究院</option>
+                                <option value="软件学院">34 软件学院</option>
+                                <option value="万科公共卫生与健康学院">35 万科公共卫生与健康学院</option>
+                                <option value="新雅书院">36 新雅书院</option>
+                                <option value="未央书院">37 未央书院</option>
+                                <option value="探微书院">38 探微书院</option>
+                                <option value="行健书院">39 行健书院</option>
+                                <option value="致理书院">40 致理书院</option>
+                                <option value="求真书院">41 求真书院</option>
+                                <option value="为先书院">42 为先书院</option>
+                                <option value="秀钟书院">43 秀钟书院</option>
+                                <option value="笃实书院">44 笃实书院</option>
+                                <option value="至善书院">45 至善书院</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>电话号码</label>
+                                <input type="tel" class="form-control" id="regTel" placeholder="请输入电话号码">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>邮箱</label>
+                                <input type="email" class="form-control" id="regEmail" placeholder="请输入电子邮箱">
+                            </div>
+                        </div>
+                        <div id="regMsg" class="reg-msg"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" form="registerForm">提交注册</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/4.6.0/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/ui-dialogs.js}"></script>
+    <script>
+        (function () {
+            function setupPasswordToggle(btnId, inputId) {
+                const btn = document.getElementById(btnId);
+                const input = document.getElementById(inputId);
+                if (!btn || !input) return;
+                btn.addEventListener('click', function () {
+                    const isPassword = input.type === 'password';
+                    input.type = isPassword ? 'text' : 'password';
+                    btn.textContent = isPassword ? '🙈' : '👁';
+                    window.__authFx = window.__authFx || {};
+                    window.__authFx.showPassword = isPassword;
+                });
+            }
+
+            setupPasswordToggle('toggleAdminPassword', 'adminPassword');
+            setupPasswordToggle('toggleReaderPassword', 'readerPassword');
+
+            const stage = document.getElementById('characters');
+            if (!stage) return;
+
+            const refs = {
+                purple: document.getElementById('charPurple'),
+                black: document.getElementById('charBlack'),
+                yellow: document.getElementById('charYellow'),
+                orange: document.getElementById('charOrange'),
+                purpleEyes: document.getElementById('purpleEyes'),
+                blackEyes: document.getElementById('blackEyes'),
+                yellowEyes: document.getElementById('yellowEyes'),
+                orangeEyes: document.getElementById('orangeEyes'),
+                purpleEyeL: document.getElementById('purpleEyeL'),
+                purpleEyeR: document.getElementById('purpleEyeR'),
+                blackEyeL: document.getElementById('blackEyeL'),
+                blackEyeR: document.getElementById('blackEyeR'),
+                purplePupilL: document.getElementById('purplePupilL'),
+                purplePupilR: document.getElementById('purplePupilR'),
+                blackPupilL: document.getElementById('blackPupilL'),
+                blackPupilR: document.getElementById('blackPupilR'),
+                orangePupilL: document.getElementById('orangePupilL'),
+                orangePupilR: document.getElementById('orangePupilR'),
+                yellowPupilL: document.getElementById('yellowPupilL'),
+                yellowPupilR: document.getElementById('yellowPupilR'),
+                yellowMouth: document.getElementById('yellowMouth')
+            };
+
+            const state = {
+                mouseX: 0,
+                mouseY: 0,
+                isTyping: false,
+                isLookingAtEachOther: false,
+                isPurplePeeking: false,
+                showPassword: false
+            };
+
+            window.__authFx = window.__authFx || {};
+            Object.defineProperty(window.__authFx, 'showPassword', {
+                get: () => state.showPassword,
+                set: (v) => { state.showPassword = !!v; }
+            });
+
+            function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+            function calcFaceAndSkew(el) {
+                if (!el) return { faceX: 0, faceY: 0, bodySkew: 0 };
+                const rect = el.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 3;
+                const dx = state.mouseX - centerX;
+                const dy = state.mouseY - centerY;
+                const faceX = clamp(dx / 20, -15, 15);
+                const faceY = clamp(dy / 30, -10, 10);
+                const bodySkew = clamp(-dx / 120, -6, 6);
+                return { faceX, faceY, bodySkew };
+            }
+
+            function setPupilOffset(pupilEl, px, py) {
+                if (!pupilEl) return;
+                pupilEl.style.setProperty('--px', px + 'px');
+                pupilEl.style.setProperty('--py', py + 'px');
+            }
+
+            function setEyeballBlink(eyeEl, blinking) {
+                if (!eyeEl) return;
+                eyeEl.style.height = blinking ? '2px' : '';
+            }
+
+            function scheduleBlink(pair) {
+                const { eyeL, eyeR } = pair;
+                const interval = Math.random() * 4000 + 3000;
+                setTimeout(() => {
+                    setEyeballBlink(eyeL, true);
+                    setEyeballBlink(eyeR, true);
+                    setTimeout(() => {
+                        setEyeballBlink(eyeL, false);
+                        setEyeballBlink(eyeR, false);
+                        scheduleBlink(pair);
+                    }, 150);
+                }, interval);
+            }
+
+            scheduleBlink({ eyeL: refs.purpleEyeL, eyeR: refs.purpleEyeR });
+            scheduleBlink({ eyeL: refs.blackEyeL, eyeR: refs.blackEyeR });
+
+            let peekTimer = null;
+            function schedulePeek() {
+                if (peekTimer) window.clearTimeout(peekTimer);
+                if (!state.showPassword) {
+                    state.isPurplePeeking = false;
+                    return;
+                }
+                peekTimer = window.setTimeout(() => {
+                    state.isPurplePeeking = true;
+                    window.setTimeout(() => { state.isPurplePeeking = false; }, 800);
+                    schedulePeek();
+                }, Math.random() * 3000 + 2000);
+            }
+
+            function updateLookAtEachOther() {
+                if (!state.isTyping) return;
+                state.isLookingAtEachOther = true;
+                window.setTimeout(() => { state.isLookingAtEachOther = false; }, 800);
+            }
+
+            function getPupilVector(fromEl, maxDist, forced) {
+                if (!fromEl) return { x: 0, y: 0 };
+                if (forced) return forced;
+                const r = fromEl.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const dx = state.mouseX - cx;
+                const dy = state.mouseY - cy;
+                const dist = Math.min(Math.sqrt(dx * dx + dy * dy), maxDist);
+                const angle = Math.atan2(dy, dx);
+                return { x: Math.cos(angle) * dist, y: Math.sin(angle) * dist };
+            }
+
+            function render() {
+                const purplePos = calcFaceAndSkew(refs.purple);
+                const blackPos = calcFaceAndSkew(refs.black);
+                const yellowPos = calcFaceAndSkew(refs.yellow);
+                const orangePos = calcFaceAndSkew(refs.orange);
+
+                const passwordFilled = (document.getElementById('adminPassword')?.value || '') !== '' || (document.getElementById('readerPassword')?.value || '') !== '';
+                const purpleHeight = (state.isTyping || (passwordFilled && !state.showPassword)) ? 440 : 400;
+                if (refs.purple) {
+                    refs.purple.style.height = purpleHeight + 'px';
+                    let transform = `skewX(${purplePos.bodySkew || 0}deg)`;
+                    if (state.showPassword && passwordFilled) {
+                        transform = 'skewX(0deg)';
+                    } else if (state.isTyping || (passwordFilled && !state.showPassword)) {
+                        transform = `skewX(${(purplePos.bodySkew || 0) - 12}deg) translateX(40px)`;
+                    }
+                    refs.purple.style.transform = transform;
+                }
+
+                if (refs.black) {
+                    let transform = `skewX(${blackPos.bodySkew || 0}deg)`;
+                    if (state.showPassword && passwordFilled) {
+                        transform = 'skewX(0deg)';
+                    } else if (state.isLookingAtEachOther) {
+                        transform = `skewX(${(blackPos.bodySkew || 0) * 1.5 + 10}deg) translateX(20px)`;
+                    } else if (state.isTyping || (passwordFilled && !state.showPassword)) {
+                        transform = `skewX(${(blackPos.bodySkew || 0) * 1.5}deg)`;
+                    }
+                    refs.black.style.transform = transform;
+                }
+
+                if (refs.orange) refs.orange.style.transform = (state.showPassword && passwordFilled) ? 'skewX(0deg)' : `skewX(${orangePos.bodySkew || 0}deg)`;
+                if (refs.yellow) refs.yellow.style.transform = (state.showPassword && passwordFilled) ? 'skewX(0deg)' : `skewX(${yellowPos.bodySkew || 0}deg)`;
+
+                if (refs.purpleEyes) {
+                    const left = (state.showPassword && passwordFilled) ? 20 : (state.isLookingAtEachOther ? 55 : (45 + (purplePos.faceX || 0)));
+                    const top = (state.showPassword && passwordFilled) ? 35 : (state.isLookingAtEachOther ? 65 : (40 + (purplePos.faceY || 0)));
+                    refs.purpleEyes.style.left = left + 'px';
+                    refs.purpleEyes.style.top = top + 'px';
+                }
+
+                if (refs.blackEyes) {
+                    const left = (state.showPassword && passwordFilled) ? 10 : (state.isLookingAtEachOther ? 32 : (26 + (blackPos.faceX || 0)));
+                    const top = (state.showPassword && passwordFilled) ? 28 : (state.isLookingAtEachOther ? 12 : (32 + (blackPos.faceY || 0)));
+                    refs.blackEyes.style.left = left + 'px';
+                    refs.blackEyes.style.top = top + 'px';
+                }
+
+                if (refs.orangeEyes) {
+                    const left = (state.showPassword && passwordFilled) ? 50 : (82 + (orangePos.faceX || 0));
+                    const top = (state.showPassword && passwordFilled) ? 85 : (90 + (orangePos.faceY || 0));
+                    refs.orangeEyes.style.left = left + 'px';
+                    refs.orangeEyes.style.top = top + 'px';
+                }
+
+                if (refs.yellowEyes) {
+                    const left = (state.showPassword && passwordFilled) ? 20 : (52 + (yellowPos.faceX || 0));
+                    const top = (state.showPassword && passwordFilled) ? 35 : (40 + (yellowPos.faceY || 0));
+                    refs.yellowEyes.style.left = left + 'px';
+                    refs.yellowEyes.style.top = top + 'px';
+                }
+
+                if (refs.yellowMouth) {
+                    const left = (state.showPassword && passwordFilled) ? 10 : (40 + (yellowPos.faceX || 0));
+                    const top = (state.showPassword && passwordFilled) ? 88 : (88 + (yellowPos.faceY || 0));
+                    refs.yellowMouth.style.left = left + 'px';
+                    refs.yellowMouth.style.top = top + 'px';
+                    refs.yellowMouth.style.transform = window.__authFx?.errorMood ? 'rotate(12deg)' : 'rotate(0deg)';
+                }
+
+                const forced = (state.showPassword && passwordFilled) ? { x: -4, y: -4 } : null;
+                const purpleForced = (state.showPassword && passwordFilled)
+                    ? (state.isPurplePeeking ? { x: 4, y: 5 } : { x: -4, y: -4 })
+                    : (state.isLookingAtEachOther ? { x: 3, y: 4 } : null);
+
+                const blackForced = (state.showPassword && passwordFilled)
+                    ? { x: -4, y: -4 }
+                    : (state.isLookingAtEachOther ? { x: 0, y: -4 } : null);
+
+                const purpleL = getPupilVector(refs.purpleEyeL, 5, purpleForced);
+                const purpleR = getPupilVector(refs.purpleEyeR, 5, purpleForced);
+                setPupilOffset(refs.purplePupilL, purpleL.x, purpleL.y);
+                setPupilOffset(refs.purplePupilR, purpleR.x, purpleR.y);
+
+                const blackL = getPupilVector(refs.blackEyeL, 4, blackForced);
+                const blackR = getPupilVector(refs.blackEyeR, 4, blackForced);
+                setPupilOffset(refs.blackPupilL, blackL.x, blackL.y);
+                setPupilOffset(refs.blackPupilR, blackR.x, blackR.y);
+
+                const orangeV = forced ? { x: -5, y: -4 } : null;
+                const yellowV = forced ? { x: -5, y: -4 } : null;
+                const orangeL = getPupilVector(refs.orangePupilL, 5, orangeV);
+                const orangeR = getPupilVector(refs.orangePupilR, 5, orangeV);
+                setPupilOffset(refs.orangePupilL, orangeL.x, orangeL.y);
+                setPupilOffset(refs.orangePupilR, orangeR.x, orangeR.y);
+
+                const yellowL = getPupilVector(refs.yellowPupilL, 5, yellowV);
+                const yellowR = getPupilVector(refs.yellowPupilR, 5, yellowV);
+                setPupilOffset(refs.yellowPupilL, yellowL.x, yellowL.y);
+                setPupilOffset(refs.yellowPupilR, yellowR.x, yellowR.y);
+
+                window.requestAnimationFrame(render);
+            }
+
+            window.addEventListener('mousemove', function (e) {
+                state.mouseX = e.clientX;
+                state.mouseY = e.clientY;
+            });
+
+            function bindTypingSignals(inputId) {
+                const el = document.getElementById(inputId);
+                if (!el) return;
+                el.addEventListener('focus', function () {
+                    state.isTyping = true;
+                    updateLookAtEachOther();
+                });
+                el.addEventListener('blur', function () {
+                    state.isTyping = false;
+                });
+                el.addEventListener('input', function () {
+                    state.isTyping = true;
+                    updateLookAtEachOther();
+                    const hasPassword = ((document.getElementById('adminPassword')?.value || '') !== '') || ((document.getElementById('readerPassword')?.value || '') !== '');
+                    if (hasPassword && state.showPassword) schedulePeek();
+                });
+            }
+
+            bindTypingSignals('adminUsername');
+            bindTypingSignals('adminPassword');
+            bindTypingSignals('readerNumber');
+            bindTypingSignals('readerPassword');
+
+            document.getElementById('toggleAdminPassword')?.addEventListener('click', schedulePeek);
+            document.getElementById('toggleReaderPassword')?.addEventListener('click', schedulePeek);
+
+            window.requestAnimationFrame(render);
+        })();
+
+        function triggerLoginErrorFx(msg) {
+            window.__authFx = window.__authFx || {};
+            window.__authFx.errorMood = true;
+            ['charPurple','charBlack','charOrange','charYellow'].forEach(id => {
+                const node = document.getElementById(id);
+                if (!node) return;
+                node.classList.remove('fx-shake');
+                void node.offsetWidth;
+                node.classList.add('fx-shake');
+            });
+            window.setTimeout(() => { if (window.__authFx) window.__authFx.errorMood = false; }, 1200);
+            if (window.ui && window.ui.alert) {
+                window.ui.alert(msg || '账号或密码错误', '登录失败');
+            }
+        }
+
+        $(function(){
+            $('#adminLoginForm').on('submit', function(e){
+                e.preventDefault();
+                adminLogin();
+            });
+            $('#readerLoginForm').on('submit', function(e){
+                e.preventDefault();
+                readerLogin();
+            });
+            $('#registerForm').on('submit', function(e){
+                e.preventDefault();
+                submitRegister();
+            });
+        });
+
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            $.ajax({
+                url: '/api/admin/login',
+                type: 'POST',
+                data: { username, password },
+                data: { username, password },
+                success: function(response) {
+                    if (response.code === 0) {
+                        window.location.href = '/admin/dashboard';
+                    } else {
+                        triggerLoginErrorFx(response.msg || response.message || '账号或密码错误');
+                    }
+                },
+                error: function() {
+                    triggerLoginErrorFx('登录失败，请重试');
+                }
+            });
+        }
+
+        function readerLogin() {
+            const readerNumber = document.getElementById('readerNumber').value;
+            const password = document.getElementById('readerPassword').value;
+            $.ajax({
+                url: '/api/reader/login',
+                type: 'POST',
+                data: { readerNumber, password },
+                data: { readerNumber, password },
+                success: function(response) {
+                    if (response.code === 0) {
+                        window.location.href = '/reader/dashboard';
+                    } else {
+                        triggerLoginErrorFx(response.msg || response.message || '账号或密码错误');
+                    }
+                },
+                error: function() {
+                    triggerLoginErrorFx('登录失败，请重试');
+                }
+            });
+        }
+
+        function submitRegister() {
+            const data = {
+                readerNumber: $('#regReaderNumber').val(),
+                password: $('#regPassword').val(),
+                realName: $('#regRealName').val(),
+                department: $('#regDepartment').val(),
+                sex: $('#regSex').val(),
+                tel: $('#regTel').val(),
+                email: $('#regEmail').val()
+            };
+
+            $('#regMsg').hide().text('');
+            $.ajax({
+                url: '/api/reader/register',
+                type: 'POST',
+                data: data,
+                success: function(resp) {
+                    if (resp.code === 0) {
+                        $('#registerModal').modal('hide');
+                        $('#registerForm')[0].reset();
+                        $('#regMsg').hide().text('');
+                    } else {
+                        $('#regMsg').show().text(resp.msg || '注册失败');
+                    }
+                },
+                error: function() {
+                    $('#regMsg').show().text('注册失败，请稍后重试');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

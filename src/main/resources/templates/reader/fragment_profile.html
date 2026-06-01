@@ -1,0 +1,839 @@
+<div id="fragmentProfile" class="fade-in" style="min-height: calc(100vh - 80px);">
+    <div class="container-fluid py-4 px-lg-4">
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .account-header { margin-bottom: 2rem; position: relative; }
+        .user-profile-section {
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            border-radius: 24px;
+            padding: 2rem;
+            color: #1e293b;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(24, 144, 255, 0.2);
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar-wrapper {
+            width: 80px;
+            height: 80px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 1.5rem;
+            border: 3px solid #e2e8f0;
+            position: relative;
+            cursor: pointer;
+            overflow: visible;
+            transition: all 0.3s;
+            z-index: 5;
+        }
+        .user-avatar-wrapper:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        .user-avatar-wrapper::after {
+            content: '\f030';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        .user-avatar-wrapper:hover::after {
+            opacity: 1;
+        }
+        .user-avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .limit-progress-wrapper {
+            flex: 1;
+            max-width: 300px;
+            margin-left: auto;
+        }
+        .progress-modern {
+            height: 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+        .progress-modern .progress-bar {
+            background: #3b82f6;
+            box-shadow: none;
+        }
+        
+        .stat-card-mini {
+            border: none;
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            background: #fff;
+        }
+        .stat-card-mini:hover { 
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        
+        .module-entry-card {
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        .module-entry-card::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, transparent 50%, rgba(24,144,255,0.05) 50%);
+            border-radius: 0 0 0 100%;
+            transition: all 0.3s;
+        }
+        .module-entry-card:hover::after {
+            transform: scale(1.5);
+        }
+        .module-entry-card:hover {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transform: translateY(-10px);
+        }
+        .module-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.2rem;
+            transition: all 0.3s;
+        }
+        .module-entry-card:hover .module-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+        
+        .text-danger-soft { color: #ef4444; }
+        .bg-danger-soft { background: #fef2f2; color: #ef4444; }
+        .bg-primary-soft { background: #eff6ff; color: #3b82f6; }
+        .bg-success-soft { background: #f0fdf4; color: #22c55e; }
+        .bg-warning-soft { background: #fff7ed; color: #f97316; }
+        
+        /* Modal Styles */
+        .modern-modal .modal-content {
+            border: none;
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .modern-modal .modal-header {
+            border-bottom: none;
+            padding: 1.5rem 2rem;
+            color: white;
+        }
+        .modern-modal .modal-header .close {
+            color: white;
+            text-shadow: none;
+            opacity: 0.8;
+        }
+        .modern-modal .modal-header .close:hover {
+            opacity: 1;
+        }
+        .modern-modal .modal-body {
+            padding: 2rem;
+        }
+        .modern-modal .modal-footer {
+            border-top: none;
+            padding: 1rem 2rem 2rem;
+        }
+        
+        /* Header Colors */
+        .modal-header-primary { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); }
+        .modal-header-success { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .modal-header-danger { background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); }
+        .modal-header-warning { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        
+        .section-title-modern {
+            color: #3b82f6;
+            border-bottom: 2px solid #eff6ff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .section-title-modern i {
+            margin-right: 0.5rem;
+        }
+        .form-control-modern {
+            border-radius: 12px;
+            padding: 0.75rem 1.2rem;
+            border: 1px solid #e8e8e8;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+        .form-control-modern:focus {
+            background: #fff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+        
+        /* Payment Selection Styles */
+        .payment-option {
+            border: 2px solid #f0f0f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+        }
+        .payment-option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .payment-option.active {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+        .payment-option.active::before {
+            content: '\f058';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 10px; right: 10px;
+            color: #3b82f6;
+        }
+        .payment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .wechat-color { color: #07c160; }
+        .alipay-color { color: #1677ff; }
+    </style>
+
+    <div class="user-profile-section">
+        <label class="user-avatar-wrapper" for="avatarInput" title="点击更换头像">
+            <i class="fas fa-user-circle" id="defaultAvatarIcon"></i>
+            <img id="userAvatarImg" style="display:none">
+        </label>
+        <input type="file" id="avatarInput" style="display:none" accept="image/*">
+        <div class="user-info">
+            <h2 id="displayRealName" class="font-weight-bold mb-1">加载中...</h2>
+            <p id="displayReaderNum" class="mb-0 text-muted small">学号: -</p>
+        </div>
+        <div class="limit-progress-wrapper d-none d-md-block">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="small">借阅额度使用情况</span>
+                <span id="limitText" class="small font-weight-bold">0/5</span>
+            </div>
+            <div class="progress progress-modern">
+                <div id="limitProgressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Top Statistics Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card-mini h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="module-icon bg-primary-soft mr-3 mb-0">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">剩余限额</div>
+                        <h4 id="accountLimit" class="font-weight-bold mb-0">5 本</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card-mini h-100" style="cursor: pointer;" id="statCardBorrowing">
+                <div class="card-body d-flex align-items-center">
+                    <div class="module-icon bg-success-soft mr-3 mb-0">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">正在借阅</div>
+                        <h4 id="accountBorrowing" class="font-weight-bold mb-0">0 本</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card-mini h-100" style="cursor: pointer;" id="statCardTotal">
+                <div class="card-body d-flex align-items-center">
+                    <div class="module-icon bg-warning-soft mr-3 mb-0">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">累计借阅</div>
+                        <h4 id="accountTotal" class="font-weight-bold mb-0">0 本</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card-mini h-100" style="cursor: pointer;" id="statCardFine">
+                <div class="card-body d-flex align-items-center">
+                    <div class="module-icon bg-danger-soft mr-3 mb-0">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">待缴罚款</div>
+                        <h4 id="accountFine" class="font-weight-bold text-danger mb-0">￥0.00</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Module Entry Cards -->
+    <div class="row">
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card module-entry-card" data-toggle="modal" data-target="#personalInfoModal">
+                <div class="card-body text-center p-4">
+                    <div class="module-icon bg-primary-soft mx-auto">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h5 class="font-weight-bold">个人信息</h5>
+                    <p class="small text-muted mb-0">更新您的基本资料</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card module-entry-card" data-toggle="modal" data-target="#currentLendModal">
+                <div class="card-body text-center p-4">
+                    <div class="module-icon bg-success-soft mx-auto">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h5 class="font-weight-bold">当前借阅</h5>
+                    <p class="small text-muted mb-0">查看正在借阅的图书</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card module-entry-card" data-toggle="modal" data-target="#fineModal">
+                <div class="card-body text-center p-4">
+                    <div class="module-icon bg-danger-soft mx-auto">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h5 class="font-weight-bold">逾期与罚款</h5>
+                    <p class="small text-muted mb-0 text-danger">查看违规记录及缴纳</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card module-entry-card" data-toggle="modal" data-target="#securityModal">
+                <div class="card-body text-center p-4">
+                    <div class="module-icon bg-warning-soft mx-auto">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h5 class="font-weight-bold">安全设置</h5>
+                    <p class="small text-muted mb-0">修改登录密码</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modals -->
+    
+    <!-- Personal Info Modal -->
+    <div class="modal fade" id="personalInfoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-unified">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-user-edit mr-2"></i>个人信息设置</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="profileForm">
+                        <input type="hidden" id="readerId" name="id">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="section-title-modern"><i class="fas fa-id-card"></i>基本资料</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="small text-muted font-weight-bold">真实姓名</label>
+                                    <input type="text" class="form-control form-control-modern" id="readerRealName" name="realName" required placeholder="请输入您的姓名">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="small text-muted font-weight-bold">联系电话</label>
+                                    <input type="text" class="form-control form-control-modern" id="readerTel" name="tel" placeholder="请输入联系电话">
+                                </div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <h6 class="section-title-modern"><i class="fas fa-envelope"></i>联系方式</h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mb-0">
+                                    <label class="small text-muted font-weight-bold">电子邮箱</label>
+                                    <input type="email" class="form-control form-control-modern" id="readerEmail" name="email" placeholder="请输入电子邮箱">
+                                    <small class="text-muted mt-2 d-block">邮箱将用于接收借阅到期提醒及逾期通知。</small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light px-4 border-0" data-dismiss="modal">取消</button>
+                    <button type="submit" form="profileForm" class="btn btn-primary px-5 shadow-sm">保存修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Lend Modal -->
+    <div class="modal fade" id="currentLendModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-unified">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-book-open mr-2"></i>当前借阅清单</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="px-4 border-0 py-3 text-muted small font-weight-bold">图书名称</th>
+                                    <th class="border-0 py-3 text-muted small font-weight-bold">借阅日期</th>
+                                    <th class="border-0 py-3 text-muted small font-weight-bold">应还日期</th>
+                                    <th class="px-4 border-0 py-3 text-muted small font-weight-bold">借阅状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="currentLendListBody">
+                                <!-- JS content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-3">
+                    <div class="w-100 d-flex justify-content-between align-items-center px-2">
+                        <small class="text-muted"><i class="fas fa-info-circle mr-1"></i>逾期将按每日 0.5 元收取罚款</small>
+                        <button type="button" class="btn btn-light btn-sm border-0 px-4" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fine & Overdue Modal -->
+    <div class="modal fade" id="fineModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-unified">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-exclamation-triangle mr-2"></i>逾期违规记录</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="alert alert-warning border-0 rounded-0 mb-0 d-flex align-items-center py-3 px-4">
+                        <i class="fas fa-info-circle mr-3 fa-lg"></i>
+                        <div>
+                            <div class="font-weight-bold">关于缴纳罚款</div>
+                            <small>请及时处理逾期记录，以免影响您的信用额度和继续借阅。点击右侧按钮可统一结算。</small>
+                        </div>
+                        <button id="payFineBtn" class="btn btn-danger btn-sm px-4 ml-auto shadow-sm" style="display:none">
+                            <i class="fas fa-credit-card mr-1"></i>立即缴纳
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="px-4 border-0 py-3 text-muted small font-weight-bold">违规图书</th>
+                                    <th class="border-0 py-3 text-muted small font-weight-bold">应还日期</th>
+                                    <th class="border-0 py-3 text-muted small font-weight-bold">违规状态</th>
+                                    <th class="px-4 border-0 py-3 text-muted small font-weight-bold text-right">罚款金额</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overdueListBody">
+                                <!-- JS content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light py-3">
+                    <button type="button" class="btn btn-light px-4" data-dismiss="modal">返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Modal -->
+    <div class="modal fade" id="securityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-unified">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-shield-alt mr-2"></i>账号安全设置</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="passwordForm">
+                        <div class="alert alert-info border-0 mb-4 py-3">
+                            <small><i class="fas fa-lightbulb mr-2"></i>定期更换密码可以有效保护您的账号安全。建议使用字母+数字组合。</small>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="small text-muted font-weight-bold">当前密码</label>
+                            <input type="password" class="form-control form-control-modern" id="oldPassword" required placeholder="请输入原登录密码">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="small text-muted font-weight-bold">新密码</label>
+                                    <input type="password" class="form-control form-control-modern" id="newPassword" required minlength="6" placeholder="至少6位字符">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label class="small text-muted font-weight-bold">确认新密码</label>
+                                    <input type="password" class="form-control form-control-modern" id="confirmPassword" required minlength="6" placeholder="请再次输入新密码">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light px-4 border-0" data-dismiss="modal">取消</button>
+                    <button type="submit" form="passwordForm" class="btn btn-primary px-5 shadow-sm font-weight-bold">更新密码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Selection Modal (New) -->
+    <div class="modal fade" id="paymentSelectionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-wallet mr-2"></i>安全支付结算</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4 py-3 bg-light rounded-lg">
+                        <div class="text-muted small mb-1">应付总额</div>
+                        <div class="text-danger h2 font-weight-bold mb-0" id="payAmountDisplay">￥0.00</div>
+                    </div>
+                    <h6 class="section-title-modern small mb-3"><i class="fas fa-check-circle"></i>选择支付方式</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="payment-option active shadow-sm" data-type="wechat">
+                                <i class="fab fa-weixin payment-icon wechat-color"></i>
+                                <div class="font-weight-bold">微信支付</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="payment-option shadow-sm" data-type="alipay">
+                                <i class="fab fa-alipay payment-icon alipay-color"></i>
+                                <div class="font-weight-bold">支付宝支付</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="paymentStatus" class="mt-4 text-center" style="display:none">
+                        <div class="spinner-border text-primary mb-2" role="status"></div>
+                        <p class="text-muted small">正在连接安全支付平台...</p>
+                    </div>
+                    <div class="alert alert-info border-0 mt-4 mb-0 py-2 small">
+                        <i class="fas fa-shield-alt mr-2"></i>支付过程受 SSL 加密保护，请放心操作。
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light px-4 border-0" data-dismiss="modal">暂不缴纳</button>
+                    <button id="confirmPaymentBtn" class="btn btn-primary px-5 shadow-sm font-weight-bold">确认支付</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var currentUserId = null;
+            var currentFineAmount = 0;
+            var maxBorrowLimit = 5;
+
+            // 将加载逻辑挂载到全局，方便头像更新后手动刷新
+            window.reloadCurrentProfile = function() {
+                loadProfile();
+            };
+
+            function loadProfile() {
+                // 每次进入页面时，强制重新获取用户信息，确保头像路径是最新的
+                $.ajax({
+                    url: '/api/reader/currentUser',
+                    type: 'GET',
+                    cache: false, // 禁用缓存
+                    success: function(resp) {
+                        if (resp && resp.code === 0 && resp.data) {
+                            var user = resp.data;
+                            currentUserId = user.id;
+                            currentFineAmount = user.fineAmount || 0;
+
+                            $('#readerId').val(user.id);
+                            $('#readerRealName').val(user.realName);
+                            $('#readerTel').val(user.tel);
+                            $('#readerEmail').val(user.email);
+                            
+                            // User Profile UI
+                            $('#displayRealName').text(user.realName);
+                            $('#displayReaderNum').text('学号: ' + (user.readerNumber || '未设置'));
+
+                            // Load Avatar if exists
+                            if (user.avatar) {
+                                var avatarUrl = user.avatar;
+                                avatarUrl += (avatarUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + new Date().getTime();
+                                $('#userAvatarImg').attr('src', avatarUrl).show();
+                                $('#defaultAvatarIcon').hide();
+                            } else {
+                                $('#userAvatarImg').hide();
+                                $('#defaultAvatarIcon').show();
+                            }
+
+                            // Update Stats with initial data
+                            updateFineUI(currentFineAmount);
+
+                            loadLendData(user.id);
+                        }
+                    }
+                });
+            }
+
+            function loadLendData(readerId) {
+                $.ajax({
+                    url: '/api/lend/listByReader/' + readerId,
+                    type: 'GET',
+                    cache: false
+                }).done(function(resp) {
+                    if(resp && resp.code === 0) {
+                        var list = resp.data;
+                        
+                        // 1. Calculate Current Borrowing (status 1=BORROWED, 4=OVERDUE)
+                        // 优先使用 status 字段，如果不存在则使用 backType 字段
+                        var currentLends = list.filter(l => {
+                            var s = l.status !== undefined ? l.status : l.backType;
+                            return s === 1 || s === 4;
+                        });
+                        var currentCount = currentLends.length;
+                        
+                        // 2. Update Stats
+                        $('#accountBorrowing').text(currentCount + ' 本');
+                        $('#accountLimit').text((maxBorrowLimit - currentCount) + ' 本');
+                        $('#accountTotal').text(list.length + ' 本');
+                        
+                        // 3. Update Progress Bar
+                        var percent = (currentCount / maxBorrowLimit) * 100;
+                        $('#limitProgressBar').css('width', percent + '%');
+                        $('#limitText').text(currentCount + '/' + maxBorrowLimit);
+                        if(percent >= 80) $('#limitProgressBar').addClass('bg-danger');
+                        else if(percent >= 50) $('#limitProgressBar').addClass('bg-warning');
+                        else $('#limitProgressBar').removeClass('bg-danger bg-warning');
+
+                        // 4. Render Lists
+                        renderCurrentLends(currentLends);
+                        var overdueRecords = list.filter(l => {
+                            var s = l.status !== undefined ? l.status : l.backType;
+                            return (l.fineAmount && l.fineAmount > 0) || s === 4;
+                        });
+                        renderOverdueList(overdueRecords);
+                    }
+                });
+            }
+
+            function updateFineUI(amount) {
+                $('#accountFine').text('￥' + amount.toFixed(2));
+                $('#payAmountDisplay').text('￥' + amount.toFixed(2));
+                if(amount > 0) {
+                    $('#payFineBtn').show();
+                    $('#accountFine').parent().parent().addClass('border-danger');
+                } else {
+                    $('#payFineBtn').hide();
+                    $('#accountFine').parent().parent().removeClass('border-danger');
+                }
+            }
+
+            function renderCurrentLends(records) {
+                var $tbody = $('#currentLendListBody');
+                if(!records || records.length === 0) {
+                    $tbody.html('<tr><td colspan="4" class="text-center py-5 text-muted">暂无正在借阅的图书</td></tr>');
+                    return;
+                }
+                var html = records.map(r => {
+                    var s = r.status !== undefined ? r.status : r.backType;
+                    return `
+                    <tr>
+                        <td class="px-4 font-weight-bold">${r.bookTitle || '未知'}</td>
+                        <td>${r.lendDate ? r.lendDate.split('T')[0] : '-'}</td>
+                        <td>${r.shouldBackDate ? r.shouldBackDate.split('T')[0] : '-'}</td>
+                        <td class="px-4">${s === 4 ? '<span class="badge badge-danger">已逾期</span>' : '<span class="badge badge-primary">借阅中</span>'}</td>
+                    </tr>
+                `}).join('');
+                $tbody.html(html);
+            }
+
+            function renderOverdueList(records) {
+                var $tbody = $('#overdueListBody');
+                if(!records || records.length === 0) {
+                    $tbody.html('<tr><td colspan="4" class="text-center py-5 text-muted">暂无违规记录</td></tr>');
+                    return;
+                }
+                var html = records.map(r => {
+                    var s = r.status !== undefined ? r.status : r.backType;
+                    return `
+                    <tr>
+                        <td class="px-4">${r.bookTitle || '未知'}</td>
+                        <td>${r.shouldBackDate ? r.shouldBackDate.split('T')[0] : '-'}</td>
+                        <td>${s === 4 ? '<span class="badge badge-danger">逾期未还</span>' : '<span class="badge badge-warning">罚金未缴</span>'}</td>
+                        <td class="px-4 text-right text-danger font-weight-bold">￥${(r.fineAmount || 0).toFixed(2)}</td>
+                    </tr>
+                `}).join('');
+                $tbody.html(html);
+            }
+
+            function handleOpenPayment() {
+                if(!currentUserId || currentFineAmount <= 0) {
+                    if (window.ui && window.ui.alert) window.ui.alert('暂无待缴罚款', '提示');
+                    return;
+                }
+                $('#paymentSelectionModal').modal('show');
+            }
+
+            loadProfile();
+
+            // Profile Update
+            $('#profileForm').off('submit').on('submit', function(e) {
+                e.preventDefault();
+                var formData = {
+                    id: $('#readerId').val(),
+                    realName: $('#readerRealName').val(),
+                    tel: $('#readerTel').val(),
+                    email: $('#readerEmail').val()
+                };
+                $.ajax({
+                    url: '/api/reader/update',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(resp) {
+                        if (resp && resp.code === 0) {
+                            window.ui.toast('信息更新成功', 'success');
+                            $('#personalInfoModal').modal('hide');
+                            $('#displayRealName').text(formData.realName);
+                        } else {
+                            window.ui.toast('更新失败: ' + ((resp.message || resp.msg) || '未知错误'), 'danger');
+                        }
+                    }
+                });
+            });
+
+            // Password Update
+            $('#passwordForm').off('submit').on('submit', function(e) {
+                e.preventDefault();
+                var oldPwd = $('#oldPassword').val();
+                var newPwd = $('#newPassword').val();
+                var confirmPwd = $('#confirmPassword').val();
+                if (newPwd !== confirmPwd) return window.ui.toast('两次输入的新密码不一致', 'warning');
+
+                $.post('/api/reader/updatePassword', {
+                    id: $('#readerId').val(),
+                    oldPassword: oldPwd,
+                    newPassword: newPwd
+                }).done(function(resp) {
+                    if (resp && resp.code === 0) {
+                        window.ui.toast('密码修改成功，请重新登录', 'success');
+                        window.location.href = '/login';
+                    } else {
+                        window.ui.toast('修改失败: ' + ((resp.message || resp.msg) || '原密码错误'), 'danger');
+                    }
+                });
+            });
+
+            // Pay Fine Trigger
+            $('#statCardFine').off('click').on('click', function(e) {
+                e.preventDefault();
+                handleOpenPayment();
+            });
+
+            $('#payFineBtn').off('click').on('click', function(e) {
+                e.preventDefault();
+                handleOpenPayment();
+            });
+
+            // Avatar Upload Trigger
+            // 逻辑已移至 reader-dashboard.js 以支持全局代理，避免 SPA 加载导致的绑定失效
+
+            // Borrowing Stat Card Click
+            $('#statCardBorrowing').off('click').on('click', function() {
+                $('#currentLendModal').modal('show');
+            });
+
+            // Total Stat Card Click
+            $('#statCardTotal').off('click').on('click', function() {
+                // 直接跳转到借阅历史模块
+                if (window.loadPageIntoContent) {
+                    window.loadPageIntoContent('/reader/lends', true);
+                } else {
+                    window.location.href = '/reader/lends';
+                }
+            });
+
+            // Payment Method Selection
+            $('.payment-option').off('click').on('click', function() {
+                $('.payment-option').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Confirm Payment (Mock)
+            $('#confirmPaymentBtn').off('click').on('click', function() {
+                var type = $('.payment-option.active').data('type');
+                var typeName = type === 'wechat' ? '微信' : '支付宝';
+                
+                $('#paymentStatus').fadeIn();
+                $(this).prop('disabled', true);
+
+                setTimeout(function() {
+                    $.post('/api/reader/payFine', {
+                        readerId: currentUserId,
+                        amount: currentFineAmount
+                    }).done(function(resp) {
+                        $('#paymentStatus').hide();
+                        $('#confirmPaymentBtn').prop('disabled', false);
+                        
+                        if(resp && resp.code === 0) {
+                            window.ui.toast('通过' + typeName + '支付成功', 'success');
+                            $('#paymentSelectionModal').modal('hide');
+                            $('#fineModal').modal('hide');
+                            loadProfile();
+                        } else {
+                            window.ui.toast('支付失败: ' + ((resp.message || resp.msg) || '系统繁忙'), 'danger');
+                        }
+                    });
+                }, 1500); // 模拟网络延迟
+            });
+        })();
+    </script>
+</div>
+</div>

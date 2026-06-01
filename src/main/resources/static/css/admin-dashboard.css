@@ -1,0 +1,43 @@
+/* Admin dashboard custom styles */
+
+/* Layout basics */
+html, body { height: 100%; margin:0; background:#f8f9fc; font-family: 'Noto Sans SC', sans-serif; }
+.admin-dashboard { min-height: 100vh; display:flex; }
+
+/* Fixed sidebar */
+.sidebar { width: 240px; flex-shrink: 0; position: fixed; top:0; left:0; bottom:0; padding-bottom:80px; overflow: auto; background: #1a1c23 !important; box-shadow: 4px 0 10px rgba(0,0,0,0.05); z-index: 1000; }
+.sidebar .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px; margin: 4px 12px; border-radius: 12px; transition: all 0.3s; }
+.sidebar .nav-link:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.sidebar .nav-link.active { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+.sidebar .sidebar-header { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.sidebar-footer { position: absolute; bottom: 0; left: 0; width: 240px; padding:20px; }
+
+/* Main content to the right of sidebar */
+.main-content { margin-left: 240px; width: calc(100% - 240px); padding: 32px; }
+.content-inner { max-width: 1400px; margin: 0 auto; }
+
+/* Statistics Cards */
+.stat-card { transition: transform 0.3s, box-shadow 0.3s; }
+.stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
+.icon-box { transition: transform 0.3s; }
+.stat-card:hover .icon-box { transform: scale(1.1); }
+
+/* Table styling */
+.table thead th { border-top: 0; border-bottom: 1px solid #edf2f7; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.table td { vertical-align: middle; padding: 1rem 0.75rem; border-top: 1px solid #edf2f7; }
+
+/* Chart container limits */
+.card .chart-wrapper { position:relative; width:100%; min-height:300px; }
+
+/* Responsive adjustments */
+@media (max-width: 1199px) {
+    .sidebar { width: 200px; }
+    .main-content { margin-left: 200px; width: calc(100% - 200px); }
+    .sidebar-footer { width: 200px; }
+}
+
+@media (max-width: 991px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.show { transform: translateX(0); }
+    .main-content { margin-left: 0; width: 100%; padding: 20px; }
+}

@@ -1,0 +1,284 @@
+<div id="fragmentReaderMessages" class="fade-in" style="min-height: calc(100vh - 80px);">
+    <div class="container-fluid py-4 px-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h3 class="font-weight-bold mb-1" style="color: #1e293b;">消息中心</h3>
+                <p class="text-muted small mb-0">查看系统公告、借阅提醒与通知</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <button id="btnMarkAllRead" class="btn btn-light shadow-sm" style="border-radius: 10px;">
+                    全部已读
+                </button>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+            <div class="card-header bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-3 mb-lg-0">
+                        <ul class="nav nav-pills custom-pills" id="msgTabs">
+                            <li class="nav-item"><a class="nav-link active" href="#" data-filter="all">全部</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#" data-filter="unread">未读</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <form id="msgFilterForm" class="d-flex justify-content-lg-end">
+                            <div class="search-box mr-2">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="msgKeyword" class="form-control" placeholder="搜标题/内容...">
+                            </div>
+                            <button type="submit" class="btn btn-dark px-3" style="border-radius: 10px;">筛选</button>
+                            <button type="button" id="msgResetBtn" class="btn btn-link text-muted">重置</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="list-group list-group-flush" id="messagesList">
+                <div class="text-center py-5 text-muted">正在加载消息...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-overlay" id="msgDrawerOverlay"></div>
+    <div class="drawer shadow-lg" id="msgDrawer">
+        <div class="drawer-header">
+            <span>消息详情</span>
+            <button class="close-drawer" id="closeMsgDrawer"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-body p-4">
+            <div class="detail-section">
+                <div class="text-muted small mb-2">标题</div>
+                <div id="mdTitle" style="color:#0f172a; font-weight: 800; font-size: 18px;">-</div>
+            </div>
+            <div class="detail-section mt-3">
+                <div class="text-muted small mb-2">时间</div>
+                <div id="mdTime" style="color:#334155;">-</div>
+            </div>
+            <div class="detail-section mt-4">
+                <div class="text-muted small mb-2">内容</div>
+                <div id="mdContent" style="white-space: pre-wrap; color:#334155;">-</div>
+            </div>
+            <div class="detail-section mt-4" id="mdActions">
+                <button class="btn btn-primary px-4" id="btnMarkReadInDrawer" style="border-radius: 12px;">标记已读</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function(){
+            var $list = $('#messagesList');
+            var allMsgs = [];
+            var currentFilter = 'all';
+            var currentReaderId = null;
+            var currentDrawerMsgId = null;
+            
+            function loadMessages(){
+                $.get('/api/reader/currentUser').done(function(userResp){
+                    if(!userResp || userResp.code !== 0 || !userResp.data) return;
+                    var readerId = userResp.data.id;
+                    currentReaderId = readerId;
+                    
+                    $.get('/api/message/list/' + readerId).done(function(resp){
+                        if(resp && resp.code === 0 && resp.data){
+                            allMsgs = resp.data || [];
+                            applyFilters();
+                        } else {
+                            $list.html('<div class="text-center py-5 text-muted">暂无消息</div>');
+                        }
+                    });
+                });
+            }
+
+            function formatTime(v){
+                if(!v) return '-';
+                var d = new Date(v);
+                if(isNaN(d.getTime())) return '-';
+                var y = d.getFullYear();
+                var m = String(d.getMonth()+1).padStart(2,'0');
+                var da = String(d.getDate()).padStart(2,'0');
+                var hh = String(d.getHours()).padStart(2,'0');
+                var mm = String(d.getMinutes()).padStart(2,'0');
+                return y + '-' + m + '-' + da + ' ' + hh + ':' + mm;
+            }
+
+            function applyFilters(){
+                var keyword = ($('#msgKeyword').val() || '').trim().toLowerCase();
+                var list = (allMsgs || []).slice();
+                if(currentFilter === 'unread'){
+                    list = list.filter(function(i){ return i.status === 0; });
+                }
+                if(keyword){
+                    list = list.filter(function(i){
+                        return ((i.title || '').toLowerCase().indexOf(keyword) >= 0) || ((i.content || '').toLowerCase().indexOf(keyword) >= 0);
+                    });
+                }
+                renderMessages(list);
+            }
+
+            function renderMessages(list){
+                if(!list || list.length === 0){
+                    $list.html('<div class="text-center py-5 text-muted">暂无消息</div>');
+                    return;
+                }
+                var html = list.map(item => {
+                    var isUnread = item.status === 0;
+                    return `
+                        <div class="list-group-item msg-item ${isUnread ? 'msg-unread' : ''}" data-id="${item.id}" style="cursor:pointer">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div>
+                                    <div class="${isUnread ? 'font-weight-bold' : ''}" style="color:#0f172a;">${item.title || '-'}</div>
+                                    <div class="small text-muted mt-1 text-truncate" style="max-width: 860px;">${item.content || ''}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="small text-muted">${formatTime(item.createTime)}</div>
+                                    <div class="mt-2">${isUnread ? '<span class="badge badge-pill badge-danger">未读</span>' : '<span class="badge badge-pill badge-secondary">已读</span>'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                $list.html(html);
+            }
+
+            function openDrawer(msg){
+                if(!msg) return;
+                currentDrawerMsgId = msg.id;
+                $('#mdTitle').text(msg.title || '-');
+                $('#mdTime').text(formatTime(msg.createTime));
+                $('#mdContent').text(msg.content || '-');
+                if(msg.status === 0){
+                    $('#mdActions').show();
+                } else {
+                    $('#mdActions').hide();
+                }
+                $('#msgDrawerOverlay').addClass('show');
+                $('#msgDrawer').addClass('open');
+                document.body.classList.add('drawer-open');
+            }
+
+            function closeDrawer(){
+                $('#msgDrawerOverlay').removeClass('show');
+                $('#msgDrawer').removeClass('open');
+                document.body.classList.remove('drawer-open');
+                currentDrawerMsgId = null;
+            }
+
+            function markRead(id){
+                if(!id) return $.Deferred().resolve().promise();
+                return $.post('/api/message/read/' + id).done(function(){
+                    if(window.updateUnreadCount) window.updateUnreadCount();
+                });
+            }
+
+            $list.on('click', '.msg-item', function(){
+                var id = $(this).data('id');
+                var msg = (allMsgs || []).find(function(m){ return m.id == id; });
+                openDrawer(msg);
+            });
+
+            $('#btnMarkReadInDrawer').on('click', function(){
+                var id = currentDrawerMsgId;
+                if(!id) return;
+                markRead(id).always(function(){
+                    loadMessages();
+                    closeDrawer();
+                });
+            });
+
+            $('#closeMsgDrawer, #msgDrawerOverlay').on('click', function(){ closeDrawer(); });
+
+            $('#msgTabs .nav-link').on('click', function(e){
+                e.preventDefault();
+                $('#msgTabs .nav-link').removeClass('active');
+                $(this).addClass('active');
+                currentFilter = $(this).data('filter');
+                applyFilters();
+            });
+
+            $('#msgFilterForm').on('submit', function(e){
+                e.preventDefault();
+                applyFilters();
+            });
+
+            $('#msgResetBtn').on('click', function(){
+                $('#msgKeyword').val('');
+                currentFilter = 'all';
+                $('#msgTabs .nav-link').removeClass('active').first().addClass('active');
+                applyFilters();
+            });
+
+            $('#btnMarkAllRead').on('click', function(){
+                if(!currentReaderId) return;
+                var unreadIds = (allMsgs || []).filter(function(m){ return m.status === 0; }).map(function(m){ return m.id; });
+                if(unreadIds.length === 0) return;
+                var reqs = unreadIds.map(function(id){ return $.post('/api/message/read/' + id); });
+                $.when.apply($, reqs).always(function(){
+                    if(window.updateUnreadCount) window.updateUnreadCount();
+                    loadMessages();
+                });
+            });
+
+            loadMessages();
+        });
+    </script>
+
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .custom-pills .nav-link {
+            border-radius: 10px; padding: 8px 16px; color: #64748b; font-weight: 500; font-size: 14px;
+        }
+        .custom-pills .nav-link.active { background: #1e293b; color: #fff; }
+
+        .search-box { position: relative; width: 280px; max-width: 52vw; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box .form-control {
+            padding-left: 36px; border-radius: 10px; background: #f1f5f9; border: none; font-size: 14px; height: 38px;
+        }
+
+        .msg-item { border-left: 3px solid transparent; }
+        .msg-item.msg-unread { background: #f8fafc; border-left-color: #ef4444; }
+        .msg-item:hover { background: #fcfdfe; }
+
+        body.drawer-open { overflow: hidden; }
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 1070;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease-out;
+        }
+        .drawer-overlay.show { opacity: 1; pointer-events: auto; }
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 460px;
+            max-width: 92vw;
+            height: 100%;
+            background: #fff;
+            z-index: 1080;
+            transform: translateX(110%);
+            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+            border-top-left-radius: 18px;
+            border-bottom-left-radius: 18px;
+            overflow: hidden;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: #0f172a;
+            background: linear-gradient(180deg, rgba(99,102,241,0.10) 0%, rgba(255,255,255,1) 100%);
+        }
+        .close-drawer { border: none; background: none; font-size: 20px; color: #94a3b8; cursor: pointer; }
+    </style>
+</div>

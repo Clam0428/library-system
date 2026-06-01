@@ -1,0 +1,490 @@
+<div id="fragmentReaders" class="fade-in" style="min-height: calc(100vh - 80px);">
+    <div class="container-fluid py-4 px-lg-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h3 class="font-weight-bold mb-1" style="color: #1e293b;">读者管理</h3>
+                <p class="text-muted small mb-0">管理读者信息、禁用状态与欠费情况</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <button id="addReaderBtn" class="btn btn-primary px-4 shadow-sm mr-2" style="border-radius: 10px;">
+                    <i class="fas fa-user-plus mr-2"></i>添加读者
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-light shadow-sm" data-toggle="dropdown" style="border-radius: 10px; width: 42px; height: 42px; padding: 0;">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg" style="border-radius: 12px;">
+                        <button id="deleteSelectedReaders" class="dropdown-item text-danger py-2">
+                            <i class="fas fa-trash-alt mr-2"></i>删除选中
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+            <div class="card-header bg-white py-3 border-0">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-3 mb-lg-0">
+                        <div class="text-muted small">支持按学号 / 姓名搜索</div>
+                    </div>
+                    <div class="col-lg-6">
+                        <form id="readersSearchForm" class="d-flex justify-content-lg-end">
+                            <div class="search-box mr-2">
+                                <i class="fas fa-search"></i>
+                                <input id="readersSearch" class="form-control" placeholder="搜学号 / 姓名...">
+                            </div>
+                            <button id="readersSearchBtn" type="button" class="btn btn-dark px-3" style="border-radius: 10px;">筛选</button>
+                            <button id="readersResetBtn" type="button" class="btn btn-link text-muted">重置</button>
+                        </form>
+                    </div>
+                </div>
+                <div id="readersMessage" class="mt-2 text-muted small" style="display:none"></div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 720px;">
+                <table class="table custom-table mb-0" id="readersTable">
+                    <thead>
+                        <tr>
+                            <th class="pl-4" style="width:40px"><input id="selectAllReaders" type="checkbox"></th>
+                            <th style="width:80px">序号</th>
+                            <th style="width:160px">学号</th>
+                            <th style="min-width:120px">真实姓名</th>
+                            <th style="min-width:160px">院系</th>
+                            <th style="width:120px">状态</th>
+                            <th class="text-right pr-4" style="width:90px">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="7" class="text-center py-5 text-muted">正在加载读者列表...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">共 <span id="readersTotalCount">0</span> 条记录</div>
+                    <nav aria-label="readers pagination">
+                        <ul class="pagination pagination-sm mb-0" id="readersPager"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="readerDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 28px; overflow: hidden;">
+          <div class="modal-header bg-primary text-white border-0">
+            <h5 class="modal-title"><i class="fas fa-user-tag mr-2"></i>读者详情</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body p-4" id="readerDetailBody">
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-dismiss="modal">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="readerModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 28px; overflow: hidden;">
+          <div class="modal-header bg-success text-white border-0">
+            <h5 class="modal-title" id="readerModalTitle"><i class="fas fa-user-edit mr-2"></i>添加读者</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body p-4">
+            <form id="readerForm">
+                <input type="hidden" id="readerId">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">学号 <span class="text-danger">*</span></label>
+                            <input id="readerNumber" class="form-control" required placeholder="请输入学号">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">真实姓名</label>
+                            <input id="readerRealName" class="form-control" placeholder="请输入姓名">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">密码</label>
+                            <input id="readerPassword" class="form-control" type="password" placeholder="添加时必填，编辑时留空不修改">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">院系</label>
+                            <select id="readerDepartment" class="form-control">
+                                <option value="">请选择院系</option>
+                                <option value="建筑学院">01 建筑学院</option>
+                                <option value="土木工程系">02 土木工程系</option>
+                                <option value="水利水电工程系">03 水利水电工程系</option>
+                                <option value="环境学院">04 环境学院</option>
+                                <option value="机械工程系">05 机械工程系</option>
+                                <option value="精密仪器系">06 精密仪器系</option>
+                                <option value="能源与动力工程系">07 能源与动力工程系</option>
+                                <option value="车辆与运载学院">08 车辆与运载学院</option>
+                                <option value="工业工程系">09 工业工程系</option>
+                                <option value="电机工程与应用电子技术系">10 电机工程与应用电子技术系</option>
+                                <option value="电子工程系">11 电子工程系</option>
+                                <option value="计算机科学与技术系">12 计算机科学与技术系</option>
+                                <option value="自动化系">13 自动化系</option>
+                                <option value="集成电路学院">14 集成电路学院</option>
+                                <option value="航天航空学院">15 航天航空学院</option>
+                                <option value="工程物理系">16 工程物理系</option>
+                                <option value="化学工程系">17 化学工程系</option>
+                                <option value="材料学院">18 材料学院</option>
+                                <option value="数学科学系">19 数学科学系</option>
+                                <option value="物理系">20 物理系</option>
+                                <option value="化学系">21 化学系</option>
+                                <option value="生命科学学院">22 生命科学学院</option>
+                                <option value="地球系统科学系">23 地球系统科学系</option>
+                                <option value="经管学院">24 经管学院</option>
+                                <option value="公共管理学院">25 公共管理学院</option>
+                                <option value="金融学院">26 金融学院</option>
+                                <option value="人文学院">27 人文学院</option>
+                                <option value="社会科学学院">28 社会科学学院</option>
+                                <option value="法学院">29 法学院</option>
+                                <option value="新闻与传播学院">30 新闻与传播学院</option>
+                                <option value="美术学院">31 美术学院</option>
+                                <option value="医学院">32 医学院</option>
+                                <option value="交叉信息研究院">33 交叉信息研究院</option>
+                                <option value="软件学院">34 软件学院</option>
+                                <option value="万科公共卫生与健康学院">35 万科公共卫生与健康学院</option>
+                                <option value="新雅书院">36 新雅书院</option>
+                                <option value="未央书院">37 未央书院</option>
+                                <option value="探微书院">38 探微书院</option>
+                                <option value="行健书院">39 行健书院</option>
+                                <option value="致理书院">40 致理书院</option>
+                                <option value="求真书院">41 求真书院</option>
+                                <option value="为先书院">42 为先书院</option>
+                                <option value="秀钟书院">43 秀钟书院</option>
+                                <option value="笃实书院">44 笃实书院</option>
+                                <option value="至善书院">45 至善书院</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">性别</label>
+                            <select id="readerSex" class="form-control">
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">状态</label>
+                            <select id="readerStatus" class="form-control">
+                                <option value="0">正常</option>
+                                <option value="1">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold">电话</label>
+                            <input id="readerTel" class="form-control" placeholder="请输入电话">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">邮箱</label>
+                    <input id="readerEmail" class="form-control" placeholder="请输入电子邮箱">
+                </div>
+            </form>
+            <div id="readerModalMsg" class="alert alert-danger py-2 mt-2" style="display:none; border-radius: 10px;"></div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-success px-4" id="readerSaveBtn">保存读者</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .search-box { position: relative; width: 320px; max-width: 52vw; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box .form-control {
+            padding-left: 36px; border-radius: 10px; background: #f1f5f9; border: none; font-size: 14px;
+        }
+
+        .custom-table thead th {
+            background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569;
+            font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 16px;
+        }
+        .custom-table tbody td { padding: 16px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .custom-table tbody tr:hover { background: #fcfdfe; }
+
+        .badge-pill { padding: 6px 12px; font-weight: 600; font-size: 12px; }
+        .badge-ok { background: #f0fdf4; color: #15803d; }
+        .badge-off { background: #fef2f2; color: #b91c1c; }
+
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center;
+            justify-content: center; color: #64748b; transition: all 0.2s;
+        }
+        .action-btn:hover { background: #f1f5f9; color: #1e293b; text-decoration: none; }
+    </style>
+
+    <script>
+        (function(){
+            var $root = $('#fragmentReaders');
+            var $table = $root.find('#readersTable');
+            var $tbody = $table.find('tbody');
+            var $pager = $root.find('#readersPager');
+            var $msg = $root.find('#readersMessage');
+            var pageSize = 10, currentPage = 1, totalCount = 0, totalPages = 0;
+            var currentKeyword = '';
+
+            function showMsg(text, isError){
+                $msg.text(text).css('color', isError? '#c00':'#666').show();
+            }
+
+            function renderPager(){
+                totalPages = Math.max(1, Math.ceil((totalCount||0)/pageSize));
+                $pager.empty();
+                var start = Math.max(1, currentPage - 2);
+                var end = Math.min(totalPages, start + 4);
+                if(currentPage > 1){
+                    $pager.append('<li class="page-item"><a class="page-link" href="#" data-page="'+(currentPage-1)+'">上一页</a></li>');
+                }
+                for(var p=start;p<=end;p++){
+                    $pager.append('<li class="page-item '+(p===currentPage? 'active':'')+'"><a class="page-link" href="#" data-page="'+p+'">'+p+'</a></li>');
+                }
+                if(currentPage < totalPages){
+                    $pager.append('<li class="page-item"><a class="page-link" href="#" data-page="'+(currentPage+1)+'">下一页</a></li>');
+                }
+            }
+
+            function renderReaders(page){
+                page = page || 1; currentPage = page;
+                $tbody.html('<tr><td colspan="7" class="text-center py-5 text-muted">正在加载...</td></tr>');
+                $msg.hide();
+                var url, params;
+                if(currentKeyword && currentKeyword.trim()!==''){
+                    url = '/api/reader/search';
+                    params = {keyword: currentKeyword.trim(), page: page, limit: pageSize};
+                } else {
+                    url = '/api/reader/list';
+                    params = {page: page, limit: pageSize};
+                }
+                $.get(url, params).done(function(resp){
+                    handleResp(resp);
+                }).fail(function(xhr, status, err){
+                    $tbody.html('<tr><td colspan="7" class="text-center py-5 text-muted">加载失败</td></tr>');
+                    showMsg('请求失败，请重试', true);
+                });
+            }
+
+            function statusLabel(s){
+                var n = parseInt(s);
+                if(isNaN(n)) return '-';
+                return n===0? '<span class="badge badge-success">正常</span>' : (n===1? '<span class="badge badge-danger">禁用</span>' : String(s));
+            }
+
+            function sexLabel(s){
+                var n = parseInt(s);
+                if(n === 2) return '女';
+                return '男';
+            }
+
+            function handleResp(resp){
+                if(!resp){
+                    $tbody.html('<tr><td colspan="7" class="text-center py-5 text-muted">无响应</td></tr>');
+                    return;
+                }
+                if(resp.code !== 0){
+                    $tbody.html('<tr><td colspan="7" class="text-center py-5 text-muted">'+(resp.msg||'请求失败')+'</td></tr>');
+                    showMsg(resp.msg||'请求错误', true);
+                    return;
+                }
+                totalCount = resp.count || 0;
+                $root.find('#readersTotalCount').text(totalCount);
+                var rows = resp.data || [];
+                if(!rows || rows.length===0){
+                    $tbody.html('<tr><td colspan="7" class="text-center py-5 text-muted">暂无数据</td></tr>');
+                    renderPager();
+                    return;
+                }
+                var html = '';
+                for(var i=0;i<rows.length;i++){
+                    var r = rows[i];
+                    var seq = (currentPage - 1) * pageSize + i + 1;
+                    var statusHtml = (parseInt(r.status) === 0)
+                        ? '<span class="badge badge-pill badge-ok">正常</span>'
+                        : '<span class="badge badge-pill badge-off">禁用</span>';
+                    html += '<tr>'+
+                        '<td><input class="rowCheck" type="checkbox" data-id="'+(r.id||'')+'"></td>'+
+                        '<td>'+seq+'</td>'+
+                        '<td>'+(r.readerNumber||'')+'</td>'+
+                        '<td>'+(r.realName||'')+'</td>'+
+                        '<td>'+(r.department||'')+'</td>'+
+                        '<td>'+statusHtml+'</td>'+
+                        '<td class="text-right pr-4">'+
+                            '<div class="dropdown">'+
+                                '<a class="action-btn" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+                                    '<i class="fas fa-ellipsis-h"></i>'+
+                                '</a>'+
+                                '<div class="dropdown-menu dropdown-menu-right border-0 shadow-lg py-2" style="border-radius: 12px;">'+
+                                    '<button class="dropdown-item py-2 btn-detail" data-id="'+(r.id||'')+'"><i class="far fa-list-alt mr-2"></i>详情</button>'+
+                                    '<button class="dropdown-item py-2 btn-edit" data-id="'+(r.id||'')+'"><i class="far fa-edit mr-2"></i>编辑</button>'+
+                                    '<div class="dropdown-divider"></div>'+
+                                    '<button class="dropdown-item py-2 text-danger btn-del" data-id="'+(r.id||'')+'"><i class="far fa-trash-alt mr-2"></i>删除</button>'+
+                                '</div>'+
+                            '</div>'+
+                        '</td>'+
+                        '</tr>';
+                }
+                $tbody.html(html);
+                renderPager();
+            }
+
+            function showReaderDetail(id) {
+                $.get('/api/reader/'+id).done(function(resp){
+                    if(!resp || resp.code!==0 || !resp.data) return window.ui.toast('无法获取读者详情', 'danger');
+                    var r = resp.data;
+                    var html = `
+                        <div class="row">
+                            <div class="col-md-6"><p><strong>真实姓名:</strong> ${r.realName || ''}</p></div>
+                            <div class="col-md-6"><p><strong>学号:</strong> ${r.readerNumber || '-'}</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6"><p><strong>院系:</strong> ${r.department || '-'}</p></div>
+                            <div class="col-md-6"><p><strong>性别:</strong> ${sexLabel(r.sex)}</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6"><p><strong>状态:</strong> ${r.status === 0 ? '正常' : '禁用'}</p></div>
+                            <div class="col-md-6"><p><strong>联系电话:</strong> ${r.tel || '-'}</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6"><p><strong>邮箱:</strong> ${r.email || '-'}</p></div>
+                            <div class="col-md-6"><p><strong>已借图书:</strong> <span class="badge badge-info">${r.borrowCount || 0}</span></p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6"><p><strong>逾期欠款:</strong> <span class="badge badge-warning">￥${(r.fineAmount || 0).toFixed(2)}</span></p></div>
+                            <div class="col-md-6"><p><strong>注册日期:</strong> ${r.registerDate ? new Date(r.registerDate).toLocaleString() : '-'}</p></div>
+                        </div>
+                    `;
+                    $('#readerDetailBody').html(html);
+                    $('#readerDetailModal').modal('show');
+                }).fail(function(){ window.ui.toast('获取详情失败', 'danger'); });
+            }
+
+            $root.off('click', '#readersSearchBtn').on('click', '#readersSearchBtn', function(){ currentKeyword = $root.find('#readersSearch').val(); renderReaders(1); });
+            $root.off('click', '#readersResetBtn').on('click', '#readersResetBtn', function(){ currentKeyword = ''; $root.find('#readersSearch').val(''); renderReaders(1); });
+            $root.off('keypress', '#readersSearch').on('keypress', '#readersSearch', function(e){ if(e.which===13){ currentKeyword = $(this).val(); renderReaders(1); } });
+            $root.off('click', '#readersPager a').on('click', '#readersPager a', function(e){ e.preventDefault(); var p = parseInt($(this).data('page')); if(p) renderReaders(p); });
+
+            $root.off('change', '#selectAllReaders').on('change', '#selectAllReaders', function(){ $root.find('.rowCheck').prop('checked', $(this).prop('checked')); });
+
+            $root.off('click', '.btn-detail').on('click', '.btn-detail', function(){
+                var id = $(this).data('id');
+                showReaderDetail(id);
+            });
+
+            $root.off('click', '#deleteSelectedReaders').on('click', '#deleteSelectedReaders', async function(){
+                var ids = $root.find('.rowCheck:checked').map(function(){ return $(this).data('id'); }).get();
+                if(ids.length===0) return window.ui.toast('请选择要删除的读者', 'warning');
+                var ok = await window.ui.confirm('确认删除选中读者？', '删除读者');
+                if(!ok) return;
+                var promises = ids.map(function(id){ return $.ajax({url:'/api/reader/'+id, method:'DELETE'}); });
+                $.when.apply($, promises).done(function(){ 
+                    window.ui.toast('删除成功', 'success');
+                    renderReaders(currentPage); 
+                }).fail(function(){ window.ui.toast('删除失败', 'danger'); });
+            });
+
+            $root.off('click', '.btn-del').on('click', '.btn-del', async function(){
+                var id = $(this).data('id');
+                var ok = await window.ui.confirm('确认删除该读者？', '删除读者');
+                if(!ok) return;
+                $.ajax({url:'/api/reader/'+id, method:'DELETE'}).done(function(resp){
+                    if(resp && resp.code===0){ 
+                        window.ui.toast('删除成功', 'success');
+                        renderReaders(currentPage); 
+                    } else { window.ui.toast('删除失败: ' + ((resp && resp.msg) || ''), 'danger'); }
+                }).fail(function(){ window.ui.toast('删除失败', 'danger'); });
+            });
+
+            $root.off('click', '#addReaderBtn').on('click', '#addReaderBtn', function(){
+                $('#readerModalTitle').text('添加读者');
+                $('#readerForm')[0].reset(); $('#readerId').val(''); $('#readerModalMsg').hide();
+                $('#readerNumber').val('').prop('readonly', false);
+                $('#readerPassword').prop('required', true);
+                $('#readerModal').modal('show');
+            });
+
+            $root.off('click', '.btn-edit').on('click', '.btn-edit', function(){
+                var id = $(this).data('id');
+                $.get('/api/reader/'+id).done(function(resp){
+                    if(!resp || resp.code!==0 || !resp.data) return window.ui.toast('无法获取读者详情', 'danger');
+                    var r = resp.data;
+                    $('#readerModalTitle').text('编辑读者');
+                    $('#readerId').val(r.id || '');
+                    $('#readerPassword').val('');
+                    $('#readerRealName').val(r.realName || '');
+                    $('#readerSex').val((r.sex !== undefined && r.sex !== null)? String(r.sex) : '0');
+                    $('#readerTel').val(r.tel || '');
+                    $('#readerEmail').val(r.email || '');
+                    $('#readerNumber').val(r.readerNumber || '');
+                    $('#readerNumber').prop('readonly', true);
+                    $('#readerDepartment').val(r.department || '');
+                    $('#readerStatus').val((r.status !== undefined && r.status !== null) ? String(r.status) : '0');
+                    $('#readerModalMsg').hide();
+                    $('#readerModal').modal('show');
+                }).fail(function(){ window.ui.toast('获取读者信息失败', 'danger'); });
+            });
+
+            $root.off('click', '#readerSaveBtn').on('click', '#readerSaveBtn', function(){
+                var id = $('#readerId').val();
+                var payload = {
+                    readerNumber: $('#readerNumber').val(),
+                    realName: $('#readerRealName').val(),
+                    sex: parseInt($('#readerSex').val()),
+                    tel: $('#readerTel').val(),
+                    email: $('#readerEmail').val(),
+                    department: $('#readerDepartment').val(),
+                    status: parseInt($('#readerStatus').val())
+                };
+                var pwd = $('#readerPassword').val();
+                if(!payload.readerNumber || payload.readerNumber.trim()===''){ $('#readerModalMsg').text('学号不能为空').show(); return; }
+                if(!id){
+                    if(!pwd || pwd.trim()===''){ $('#readerModalMsg').text('密码不能为空').show(); return; }
+                    payload.password = pwd;
+                    $.ajax({url:'/api/reader/register', method:'POST', contentType:'application/json', data: JSON.stringify(payload)}).done(function(resp){
+                        if(resp && resp.code===0){ $('#readerModal').modal('hide'); renderReaders(1); } else { $('#readerModalMsg').text(resp && resp.msg || '保存失败').show(); }
+                    }).fail(function(){ $('#readerModalMsg').text('请求失败').show(); });
+                } else {
+                    if(pwd && pwd.trim()!=='') payload.password = pwd;
+                    payload.id = id;
+                    $.ajax({url:'/api/reader/update', method:'POST', contentType:'application/json', data: JSON.stringify(payload)}).done(function(resp){
+                        if(resp && resp.code===0){ $('#readerModal').modal('hide'); renderReaders(currentPage); } else { $('#readerModalMsg').text(resp && resp.msg || '保存失败').show(); }
+                    }).fail(function(){ $('#readerModalMsg').text('请求失败').show(); });
+                }
+            });
+
+            renderReaders(1);
+        })();
+    </script>
+</div>

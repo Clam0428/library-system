@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>读者 - 仪表板</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/reader-dashboard.css">
+    <link rel="stylesheet" href="/css/modal-theme.css">
+    <link rel="stylesheet" href="/css/theme-niand.css">
+</head>
+<body class="theme-niand">
+<div class="reader-dashboard d-flex">
+    <aside class="sidebar text-white">
+        <div class="sidebar-header text-center py-4">
+            <h4 class="mb-0">智慧图书馆</h4>
+            <small>读者工作台</small>
+        </div>
+        <nav class="nav flex-column p-2 mt-2">
+            <a class="nav-link spa-link active" href="/reader/books"><i class="fas fa-search mr-2"></i> 图书查询</a>
+            <a class="nav-link spa-link" href="/reader/lends"><i class="fas fa-history mr-2"></i> 借阅历史</a>
+            <a class="nav-link spa-link" href="/reader/messages"><i class="fas fa-envelope mr-2"></i> 消息中心 <span class="badge badge-pill badge-danger" id="unreadBadge" style="display:none">0</span></a>
+            <a class="nav-link spa-link" href="/reader/profile"><i class="fas fa-user-cog mr-2"></i> 账户管理</a>
+        </nav>
+        <div class="sidebar-footer p-3">
+            <button id="logoutBtn" class="btn btn-sm btn-danger btn-block">登出</button>
+        </div>
+    </aside>
+
+    <main class="flex-fill main-content">
+        <div class="content-inner">
+            <!-- 初始由 JS 加载图书查询页面 -->
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">加载中...</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="/webjars/jquery/3.6.0/jquery.min.js"></script>
+<script src="/webjars/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+<script src="/js/ui-dialogs.js"></script>
+<script src="/js/reader-dashboard.js"></script>
+</body>
+</html>

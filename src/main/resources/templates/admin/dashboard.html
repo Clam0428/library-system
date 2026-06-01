@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员 - 统计分析</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-dashboard.css?v=2">
+    <link rel="stylesheet" href="/css/modal-theme.css">
+    <link rel="stylesheet" href="/css/theme-niand.css">
+</head>
+<body class="theme-niand">
+<div class="admin-dashboard d-flex">
+    <aside class="sidebar bg-dark text-white">
+        <div class="sidebar-header text-center py-4">
+            <h4 class="mb-0">图书馆管理</h4>
+            <small>管理员面板</small>
+        </div>
+        <nav class="nav flex-column p-2">
+            <a class="nav-link text-white spa-link" href="/admin/dashboard"><i class="fas fa-chart-pie mr-2"></i> 统计分析</a>
+            <!-- 管理员管理已移除 -->
+            <!-- 读者面板链接已移除，改为统一的读者管理入口 -->
+            <a class="nav-link text-white spa-link" href="/admin/readers" title="读者管理"><i class="fas fa-user-friends mr-2"></i> 读者管理</a>
+            <!-- 其它功能入口（后端未实现） -->
+            <a class="nav-link text-white spa-link" href="/admin/books" title="图书管理"><i class="fas fa-book mr-2"></i> 图书管理</a>
+            <a class="nav-link text-white spa-link" href="/admin/lends" title="借阅管理"><i class="fas fa-book-reader mr-2"></i> 借阅管理</a>
+            <a class="nav-link text-white spa-link" href="/admin/announcements" title="发布公告"><i class="fas fa-bullhorn mr-2"></i> 发布公告</a>
+        </nav>
+        <div class="sidebar-footer p-3">
+            <div id="adminProfileEntry" class="d-flex align-items-center" style="cursor: pointer; padding: 10px 10px; border-radius: 14px;">
+                <div class="admin-avatar" style="width: 42px; height: 42px; border-radius: 999px; background: rgba(15,23,42,0.08); display:flex; align-items:center; justify-content:center; margin-right: 10px;">
+                    <i class="fas fa-user" style="color: rgba(15,23,42,0.75);"></i>
+                </div>
+                <div id="adminProfileName" style="font-weight: 800; font-size: 14px; color: rgba(15,23,42,0.92); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">管理员</div>
+            </div>
+            <button id="logoutBtn" class="btn btn-sm btn-danger btn-block">登出</button>
+        </div>
+    </aside>
+
+    <main class="flex-fill p-4 main-content">
+        <div class="content-inner"></div>
+    </main>
+</div>
+
+<div class="modal fade" id="adminProfileModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-unified" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">管理员信息</div>
+                    <div class="modal-subtitle">更新个人资料与登录信息</div>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="adminProfileForm">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>姓名</label>
+                            <input class="form-control" id="adminRealName" placeholder="请输入姓名">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>性别</label>
+                            <select class="custom-select" id="adminSex">
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>工号</label>
+                            <input class="form-control" id="adminJobNumber" placeholder="请输入工号">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>手机号</label>
+                            <input class="form-control" id="adminTel" placeholder="请输入手机号">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>用户名</label>
+                            <input class="form-control" id="adminUsername" placeholder="请输入用户名">
+                        </div>
+                    </div>
+                </form>
+
+                <div class="border-top pt-3 mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div style="font-weight: 800; color: rgba(15, 23, 42, 0.92);">修改密码</div>
+                        <div class="text-muted small">修改后将继续保持登录</div>
+                    </div>
+                    <form id="adminPwdForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>原密码</label>
+                                <input type="password" class="form-control" id="adminOldPwd" placeholder="原密码">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>新密码</label>
+                                <input type="password" class="form-control" id="adminNewPwd" placeholder="新密码">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>确认新密码</label>
+                                <input type="password" class="form-control" id="adminNewPwd2" placeholder="确认新密码">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="submit" class="btn btn-primary" form="adminProfileForm" id="btnSaveAdminProfile">保存资料</button>
+                <button type="button" class="btn btn-primary" id="btnSaveAdminPwd">更新密码</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/webjars/jquery/3.6.0/jquery.min.js"></script>
+<script src="/webjars/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/ui-dialogs.js"></script>
+<script src="/js/admin-dashboard.js?v=3"></script>
+</body>
+</html>
