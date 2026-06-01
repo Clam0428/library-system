@@ -1,15 +1,12 @@
 version: '3.8'
 
 services:
-  # MySQL 数据库服务
   mysql:
     image: mysql:8.0
     container_name: library-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
-      MYSQL_DATABASE: ${DB_NAME:-library_db}
-      MYSQL_USER: ${DB_USERNAME:-admin}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: library_db
     ports:
       - "3306:3306"
     volumes:
@@ -22,7 +19,6 @@ services:
       timeout: 20s
       retries: 10
 
-  # Redis 缓存服务
   redis:
     image: redis:7-alpine
     container_name: library-redis
@@ -37,16 +33,15 @@ services:
       timeout: 20s
       retries: 10
 
-  # 图书管理系统应用
   library-app:
     build: .
     container_name: library-app
     environment:
-      DB_USERNAME: ${DB_USERNAME:-root}
-      DB_PASSWORD: ${DB_PASSWORD:-root}
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_NAME: ${DB_NAME:-library_db}
+      DB_NAME: library_db
+      DB_USERNAME: root
+      DB_PASSWORD: root
       REDIS_HOST: redis
       REDIS_PORT: 6379
     ports:
